@@ -77,6 +77,13 @@ The lyrics pop-up and song-info panel follow ideas from Juxtopposed's video [I R
 
 ## 📋 Changelog
 
+### v1.3.1
+
+- With **Show only on hover** on, the hidden controls now give their space to the lyrics instead of leaving a gap. Full screen on a wide screen keeps its layout.
+- New like button: a two-tone badge next to the song title that turns pink when liked and pops when tapped.
+- Full screen on a portrait screen: the volume is a vertical bar on the left edge with its icon below.
+- Bigger, brighter controls in full screen.
+
 ### v1.3.0
 
 - Added shuffle, repeat (all / this song), like and a volume slider with mute to the mini player and full screen.

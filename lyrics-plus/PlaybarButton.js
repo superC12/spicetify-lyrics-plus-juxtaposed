@@ -69,6 +69,9 @@
 		repeatOne: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8V6.5A2.5 2.5 0 0 1 4.5 4h9M11.5 2l2 2-2 2M14 8v1.5A2.5 2.5 0 0 1 11.5 12h-9M4.5 10l-2 2 2 2"/><path d="M7.4 6.6 8.3 6v4" stroke-width="1.3"/></svg>',
 		heart: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8 13.8 2.6 8.6A3.3 3.3 0 0 1 7.3 3.9L8 4.6l.7-.7a3.3 3.3 0 0 1 4.7 4.7L8 13.8z"/></svg>',
 		heartFilled: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 13.8 2.6 8.6A3.3 3.3 0 0 1 7.3 3.9L8 4.6l.7-.7a3.3 3.3 0 0 1 4.7 4.7L8 13.8z"/></svg>',
+		// Like button: a two-tone badge. Not liked: soft circle with a white heart. Liked: pink circle with the heart cut out of it.
+		likeOff: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="currentColor" opacity=".16"/><path fill="currentColor" d="M12 18.4 6.5 13.1a3.7 3.7 0 0 1 5.2-5.2l.3.3.3-.3a3.7 3.7 0 0 1 5.2 5.2z"/></svg>',
+		likeOn: '<svg viewBox="0 0 24 24"><path fill="#ff5c93" fill-rule="evenodd" d="M12 0a12 12 0 1 0 0 24 12 12 0 1 0 0-24zm0 18.4 5.5-5.3a3.7 3.7 0 0 0-5.2-5.2l-.3.3-.3-.3a3.7 3.7 0 0 0-5.2 5.2z"/></svg>',
 		volume: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h2.5L8 3v10L4.5 10H2zM10.5 5.5a3.5 3.5 0 0 1 0 5M12.5 3.5a6.3 6.3 0 0 1 0 9"/></svg>',
 		muted: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h2.5L8 3v10L4.5 10H2zM10.5 6l4 4M14.5 6l-4 4"/></svg>',
 	};
@@ -91,7 +94,9 @@
 		.lpm-icon.lpm-on { color: var(--spice-button, #1ed760); }
 		.lpm-main { flex: 1; min-height: 0; display: grid; gap: 10px; padding: 4px 16px 0; }
 		.lpm-art { width: 100%; height: 100%; min-height: 0; object-fit: cover; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.4); background: rgba(255,255,255,.08); }
-		.lpm-meta { min-width: 0; text-align: center; }
+		/* Song info: title and artist with the like badge beside them */
+		.lpm-meta { display: flex; align-items: center; gap: 10px; min-width: 0; text-align: left; }
+		.lpm-metatext { flex: 1; min-width: 0; }
 		.lpm-title { overflow: hidden; font-size: 16px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 		.lpm-artist { overflow: hidden; color: rgba(255,255,255,.75); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 		.lpm-lyrics { min-height: 0; overflow-y: auto; padding: 8px 2px 30%; font-size: var(--lpm-font, 18px); font-weight: 700; line-height: 1.35; text-align: center; scrollbar-width: none;
@@ -112,17 +117,28 @@
 		.lpm-ctl.lpm-small svg { width: 15px; height: 15px; }
 		.lpm-ctl.lpm-small:hover { color: #fff; }
 		.lpm-ctl.lpm-on { color: var(--spice-button, #1ed760); }
-		.lpm-extras { display: flex; align-items: center; gap: 6px; padding: 0 16px 10px; flex: 0 0 auto; }
-		.lpm-spacer { flex: 1; }
+		.lpm-dock { flex: 0 0 auto; }
+		.lpm-extras { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 16px 10px; }
+		.lpm-volwrap { display: flex; flex-direction: row-reverse; align-items: center; gap: 6px; }
 		.lpm-volume { width: 96px; height: 4px; margin: 0; border-radius: 2px; appearance: none; -webkit-appearance: none; cursor: pointer;
 			background: linear-gradient(to right, #fff var(--lpm-vol, 0%), rgba(255,255,255,.25) var(--lpm-vol, 0%)); }
 		.lpm-volume::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .15s; }
 		.lpm-volume:hover::-webkit-slider-thumb, .lpm-volume:active::-webkit-slider-thumb { opacity: 1; }
 		.lpm[data-mode="compact"] .lpm-extras { display: none; }
-		/* "Show only on hover": progress, controls and volume fade in when the pointer is over the player */
-		.lpm.lpm-hover-controls .lpm-progress, .lpm.lpm-hover-controls .lpm-controls, .lpm.lpm-hover-controls .lpm-extras { opacity: 0; transition: opacity .2s; }
-		.lpm.lpm-hover-controls:hover .lpm-progress, .lpm.lpm-hover-controls:hover .lpm-controls, .lpm.lpm-hover-controls:hover .lpm-extras,
-		.lpm.lpm-hover-controls:focus-within .lpm-progress, .lpm.lpm-hover-controls:focus-within .lpm-controls, .lpm.lpm-hover-controls:focus-within .lpm-extras { opacity: 1; }
+		/* Like: a two-tone badge that pops when tapped */
+		.lpm-like { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #fff; cursor: pointer; transition: transform .15s; }
+		.lpm-like svg { width: 100%; height: 100%; filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)); }
+		.lpm-like:hover { transform: scale(1.08); }
+		.lpm-like.lpm-pop { animation: lpm-pop .35s ease-out; }
+		@keyframes lpm-pop { 0% { transform: scale(1); } 40% { transform: scale(1.3); } 100% { transform: scale(1); } }
+		/* "Show only on hover": the controls fold away and the lyrics take their space, then unfold when you point at the player.
+		   Full screen in landscape keeps its spacing and just fades them. */
+		.lpm.lpm-hover-controls .lpm-dock { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .25s ease, opacity .2s; }
+		.lpm.lpm-hover-controls:hover .lpm-dock, .lpm.lpm-hover-controls:focus-within .lpm-dock { max-height: 220px; opacity: 1; }
+		.lpm.lpm-hover-controls[data-mode="landscape"] .lpm-dock { max-height: none; overflow: visible; }
+		/* The like badge beside the title hides and shows with the controls */
+		.lpm.lpm-hover-controls .lpm-like { opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s, transform .15s; }
+		.lpm.lpm-hover-controls:hover .lpm-like, .lpm.lpm-hover-controls:focus-within .lpm-like { opacity: 1; visibility: visible; }
 		.lpm-ctl { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #fff; cursor: pointer; }
 		.lpm-ctl svg { width: 16px; height: 16px; }
 		.lpm-ctl.lpm-play { width: 40px; height: 40px; background: #fff; color: #000; }
@@ -143,16 +159,16 @@
 		/* Compact: one row, small cover, no lyrics */
 		.lpm[data-mode="compact"] .lpm-main { grid-template-columns: 64px 1fr; align-items: center; }
 		.lpm[data-mode="compact"] .lpm-art { width: 64px; height: 64px; }
-		.lpm[data-mode="compact"] .lpm-meta { text-align: left; }
 		.lpm[data-mode="compact"] .lpm-lyrics { display: none; }
 		/* Expanded: big cover with the title over it, no lyrics */
 		.lpm[data-mode="expanded"] .lpm-main { grid-template-rows: 1fr auto; justify-items: center; }
 		.lpm[data-mode="expanded"] .lpm-art { aspect-ratio: 1; width: auto; max-width: 100%; }
+		.lpm[data-mode="expanded"] .lpm-meta { justify-self: stretch; }
 		.lpm[data-mode="expanded"] .lpm-lyrics { display: none; }
 		/* Lyrics: small header with cover and title, lyrics fill the rest */
 		.lpm[data-mode="lyrics"] .lpm-main { grid-template-columns: 56px 1fr; grid-template-rows: 56px 1fr; }
 		.lpm[data-mode="lyrics"] .lpm-art { width: 56px; height: 56px; }
-		.lpm[data-mode="lyrics"] .lpm-meta { align-self: center; text-align: left; }
+		.lpm[data-mode="lyrics"] .lpm-meta { align-self: center; }
 		.lpm[data-mode="lyrics"] .lpm-lyrics { grid-column: 1 / -1; }
 
 		/* Full screen */
@@ -165,7 +181,21 @@
 		.lpm.lpm-full .lpm-art { width: min(42vh, 32vw); height: min(42vh, 32vw); border-radius: 12px; }
 		.lpm.lpm-full .lpm-title { font-size: clamp(22px, 3.4vw, 54px); white-space: normal; }
 		.lpm.lpm-full .lpm-artist { font-size: clamp(14px, 1.6vw, 26px); }
-		.lpm.lpm-full .lpm-progress, .lpm.lpm-full .lpm-controls, .lpm.lpm-full .lpm-extras { width: min(42vh, 32vw); padding-left: 0; padding-right: 0; }
+		.lpm.lpm-full .lpm-dock, .lpm.lpm-full .lpm-meta { width: min(42vh, 32vw); }
+		.lpm.lpm-full .lpm-meta { gap: 16px; }
+		.lpm.lpm-full .lpm-progress, .lpm.lpm-full .lpm-extras { padding-left: 0; padding-right: 0; }
+		/* Bigger, brighter controls in full screen */
+		.lpm.lpm-full .lpm-progress { font-size: 13px; }
+		.lpm.lpm-full .lpm-controls { gap: 22px; padding: 14px 0 10px; }
+		.lpm.lpm-full .lpm-ctl { width: 44px; height: 44px; }
+		.lpm.lpm-full .lpm-ctl svg { width: 22px; height: 22px; }
+		.lpm.lpm-full .lpm-ctl.lpm-play { width: 64px; height: 64px; }
+		.lpm.lpm-full .lpm-ctl.lpm-play svg { width: 26px; height: 26px; }
+		.lpm.lpm-full .lpm-ctl.lpm-small { width: 40px; height: 40px; color: rgba(255,255,255,.85); }
+		.lpm.lpm-full .lpm-ctl.lpm-small svg { width: 20px; height: 20px; }
+		.lpm.lpm-full .lpm-ctl.lpm-small.lpm-on { color: var(--spice-button, #1ed760); }
+		.lpm.lpm-full .lpm-like { width: 48px; height: 48px; }
+		.lpm.lpm-full .lpm-volume { width: 130px; }
 		.lpm.lpm-full .lpm-lyrics { display: block; height: 80vh; font-size: calc(var(--lpm-font, 18px) * 1.8); text-align: left; }
 		.lpm.lpm-full.lpm-nolyrics .lpm-lyrics { display: none; }
 		/* Full screen on a tall (portrait) screen: cover, song and controls on top, lyrics below */
@@ -175,9 +205,12 @@
 		.lpm.lpm-full[data-mode="portrait"] .lpm-art { width: min(34vh, 62vw); height: min(34vh, 62vw); }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-title { font-size: clamp(22px, 5vw, 56px); }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-artist { font-size: clamp(14px, 2.6vw, 28px); }
-		.lpm.lpm-full[data-mode="portrait"] .lpm-progress,
-		.lpm.lpm-full[data-mode="portrait"] .lpm-controls,
-		.lpm.lpm-full[data-mode="portrait"] .lpm-extras { width: min(56vw, 520px); }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-dock, .lpm.lpm-full[data-mode="portrait"] .lpm-meta { width: max(min(34vh, 62vw), 280px); }
+		/* Portrait: volume as a vertical bar on the left edge with its icon below. It fades with the rest of the controls. */
+		.lpm.lpm-full[data-mode="portrait"] .lpm-extras { padding: 0; }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-volwrap { position: absolute; left: 3.5vw; top: 50%; transform: translateY(-50%); flex-direction: column; gap: 12px; z-index: 1; }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-volume { writing-mode: vertical-lr; direction: rtl; width: 6px; height: 30vh; border-radius: 3px;
+			background: linear-gradient(to top, #fff var(--lpm-vol, 0%), rgba(255,255,255,.25) var(--lpm-vol, 0%)); }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-lyrics { height: auto; min-height: 0; padding-bottom: 20vh; font-size: calc(var(--lpm-font, 18px) * 1.6); text-align: center; }
 		.lpm-side { display: contents; }
 	`;
@@ -344,7 +377,6 @@
 		els.art = h("img", { class: "lpm-art", alt: "", draggable: "false" });
 		els.title = h("div", { class: "lpm-title" });
 		els.artist = h("div", { class: "lpm-artist" });
-		els.meta = h("div", { class: "lpm-meta" }, els.title, els.artist);
 		els.lyrics = h("div", { class: "lpm-lyrics" });
 		els.elapsed = h("span", {}, "0:00");
 		els.remaining = h("span", {}, "-0:00");
@@ -369,11 +401,14 @@
 			iconButton("next", "Next", () => Spicetify.Player.next(), "lpm-ctl"),
 			els.repeatBtn
 		);
-		// Like button and volume, on their own row under the playback controls
-		els.likeBtn = iconButton("heart", "Save to Liked Songs", () => {
+		els.likeBtn = iconButton("likeOff", "Save to Liked Songs", () => {
 			Spicetify.Player.toggleHeart();
+			// A little pop, then the real state once Spotify has saved it
+			els.likeBtn.classList.remove("lpm-pop");
+			void els.likeBtn.offsetWidth;
+			els.likeBtn.classList.add("lpm-pop");
 			setTimeout(paintModes, 300);
-		}, "lpm-ctl lpm-small");
+		}, "lpm-like");
 		els.muteBtn = iconButton("volume", "Mute", () => {
 			Spicetify.Player.toggleMute();
 			setTimeout(paintModes, 150);
@@ -385,9 +420,14 @@
 		});
 		els.volume.addEventListener("pointerdown", () => (mini.draggingVolume = true));
 		els.volume.addEventListener("pointerup", () => (mini.draggingVolume = false));
-		els.extras = h("div", { class: "lpm-extras" }, els.likeBtn, h("span", { class: "lpm-spacer" }), els.muteBtn, els.volume);
+		// Slider then icon: shown icon-first in a row, and as a vertical bar with the icon underneath on portrait screens
+		els.volWrap = h("div", { class: "lpm-volwrap" }, els.volume, els.muteBtn);
+		els.meta = h("div", { class: "lpm-meta" }, h("div", { class: "lpm-metatext" }, els.title, els.artist), els.likeBtn);
+		els.extras = h("div", { class: "lpm-extras" }, els.volWrap);
+		// Everything under the song info, kept together so "Show only on hover" can fold it away and give the space to the lyrics
+		els.dock = h("div", { class: "lpm-dock" }, els.progress, els.controls, els.extras);
 		// In full screen the cover, title, progress and controls stack on the left, lyrics on the right
-		els.side = h("div", { class: "lpm-side" }, els.art, els.meta, els.progress, els.controls, els.extras);
+		els.side = h("div", { class: "lpm-side" }, els.art, els.meta, els.dock);
 		els.main = h("div", { class: "lpm-main" }, els.side, els.lyrics);
 
 		const root = h("div", { class: "lpm", role: "dialog", "aria-label": "Mini player" }, els.bg, els.bar, els.main);
@@ -455,9 +495,9 @@
 		root.dataset.mode = mode;
 		// Outside full screen the progress bar and controls sit full width under everything else
 		if (full) {
-			if (els.progress.parentElement !== els.side) els.side.append(els.progress, els.controls, els.extras);
-		} else if (els.progress.parentElement !== root) {
-			root.append(els.progress, els.controls, els.extras);
+			if (els.dock.parentElement !== els.side) els.side.append(els.dock);
+		} else if (els.dock.parentElement !== root) {
+			root.append(els.dock);
 		}
 		root.classList.toggle("lpm-hover-controls", store.get("hoverControls", false));
 	}
@@ -818,7 +858,7 @@
 		els.repeatBtn.title = ["Repeat: off", "Repeat: all", "Repeat: this song"][repeat] ?? "Repeat";
 		const liked = !!Spicetify.Player.getHeart?.();
 		els.likeBtn.classList.toggle("lpm-on", liked);
-		const likeIcon = liked ? ICONS.heartFilled : ICONS.heart;
+		const likeIcon = liked ? ICONS.likeOn : ICONS.likeOff;
 		if (els.likeBtn.dataset.icon !== likeIcon) {
 			els.likeBtn.innerHTML = likeIcon;
 			els.likeBtn.dataset.icon = likeIcon;
