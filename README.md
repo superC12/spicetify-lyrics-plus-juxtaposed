@@ -28,7 +28,11 @@ The pop-up reads lyrics from Spotify first and [LRCLIB](https://lrclib.net) seco
 
 ## 📦 Install
 
-Custom apps can't be installed in one click from Marketplace, so this is a manual install.
+### Marketplace
+
+Find **Lyrics Plus (Juxtaposed Edition)** in Marketplace's **Apps** tab. Marketplace lists custom apps and links to their installation instructions; it cannot install this custom app in one click.
+
+### Manual
 
 1. Download this repo and copy the `lyrics-plus` folder into your Spicetify `CustomApps` folder.
 
@@ -45,6 +49,25 @@ Custom apps can't be installed in one click from Marketplace, so this is a manua
    ```
 
 A `lyrics-plus` folder in your own `CustomApps` folder takes priority over the copy bundled with Spicetify, so this replaces the stock app without touching Spicetify's files.
+
+## Updates (Windows)
+
+Marketplace installs use Marketplace's **Installed → Update** action when an update is available. Custom apps can be discovered in Marketplace, but Lyrics Plus still needs the manual installation above.
+
+For manual installs, download [update.ps1](update.ps1) and run it with PowerShell:
+
+```powershell
+# Update this project once
+powershell -NoProfile -ExecutionPolicy Bypass -File .\update.ps1
+# Enable a daily automatic update while signed in
+powershell -NoProfile -ExecutionPolicy Bypass -File .\update.ps1 -EnableAutoUpdate
+# Check without changing files
+powershell -NoProfile -ExecutionPolicy Bypass -File .\update.ps1 -CheckOnly
+# Stop automatic updates
+powershell -NoProfile -ExecutionPolicy Bypass -File .\update.ps1 -DisableAutoUpdate
+```
+
+Use `-Component Both` on these commands to manage the theme and Lyrics Plus together. Only existing manual-install folders are updated. Updates come from the latest published GitHub release, skip an unchanged release commit, and run `spicetify apply` only after downloading changed files; this may reload Spotify. Backups are retained in a `juxtaposed-*` folder in Windows' temporary directory. Failed updates restore the original source files; errors are recorded in `%LOCALAPPDATA%\SpicetifyJuxtaposedUpdater\errors.log`. The scheduled updater runs as your current user without administrator privileges.
 
 ## ⚙️ Settings
 
@@ -77,9 +100,11 @@ The lyrics pop-up and song-info panel follow ideas from Juxtopposed's video [I R
 
 ## 📋 Changelog
 
-Consolidated release notes: patch updates are grouped under their minor release, with basic controls included in the initial feature release. Historical Git commits, tags and source version identifiers are preserved.
+Related changes are combined under the newest release version.
 
-### v1.3.0 (includes v1.3.2)
+### v1.3.0
+
+- Added a Windows updater for manual installs, with optional daily updates and rollback on failure.
 
 - Volume icon has a larger click target, keyboard focus feedback, and synchronized Mute/Unmute labels. Clicking at zero volume restores the last audible level.
 
