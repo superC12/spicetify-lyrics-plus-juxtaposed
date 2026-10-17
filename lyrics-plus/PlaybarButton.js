@@ -126,7 +126,8 @@
 		.lpm-ctl.lpm-on { color: var(--spice-button, #1ed760); }
 		.lpm-dock { flex: 0 0 auto; }
 		.lpm-extras { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 16px 10px; }
-		.lpm-volwrap { display: flex; flex-direction: row-reverse; align-items: center; gap: 6px; }
+		.lpm-volwrap { position: relative; display: flex; flex-direction: row-reverse; align-items: center; gap: 6px; }
+		.lpm-volwrap .lpm-mute { position: absolute; right: calc(100% + 6px); top: 50%; transform: translateY(-50%); }
 		.lpm-volume { width: 96px; height: 4px; margin: 0; border-radius: 2px; appearance: none; -webkit-appearance: none; cursor: pointer;
 			background: linear-gradient(to right, #fff var(--lpm-vol, 0%), rgba(255,255,255,.25) var(--lpm-vol, 0%)); }
 		.lpm-volume::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .15s; }
@@ -219,6 +220,7 @@
 		/* Portrait: volume as a vertical bar on the left edge with its icon below. It fades with the rest of the controls. */
 		.lpm.lpm-full[data-mode="portrait"] .lpm-extras { padding: 0; }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-volwrap { position: absolute; left: 3.5vw; top: 50%; transform: translateY(-50%); flex-direction: column; gap: 12px; z-index: 1; }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-volwrap .lpm-mute { position: static; transform: none; }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-volume { writing-mode: vertical-lr; direction: rtl; width: 6px; height: clamp(120px, 18vh, 240px); border-radius: 3px;
 			background: linear-gradient(to top, #fff var(--lpm-vol, 0%), rgba(255,255,255,.25) var(--lpm-vol, 0%)); }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-lyrics { height: auto; min-height: 0; padding-bottom: 20vh; font-size: calc(var(--lpm-font, 18px) * 1.6); text-align: center; }
@@ -420,6 +422,7 @@
 			setTimeout(paintModes, 300);
 		}, "lpm-like");
 		els.muteBtn = iconButton("volume", "Mute", () => {
+			mini.pendingVolume = null;
 			// setMute/toggleMute click Spotify's old volume-button selector, which newer clients no longer expose.
 			const volume = Spicetify.Player.getVolume();
 			if (volume > 0) {
@@ -432,11 +435,19 @@
 		}, "lpm-ctl lpm-small lpm-mute");
 		els.volume = h("input", { type: "range", class: "lpm-volume", min: "0", max: "100", step: "1", "aria-label": "Volume" });
 		els.volume.addEventListener("input", () => {
-			Spicetify.Player.setVolume(Number(els.volume.value) / 100);
+			const percent = Math.max(0, Math.min(100, Number(els.volume.value)));
+			mini.pendingVolume = { percent, until: Date.now() + 1000 };
+			Spicetify.Player.setVolume(percent / 100);
 			paintVolume();
 		});
-		els.volume.addEventListener("pointerdown", () => (mini.draggingVolume = true));
-		els.volume.addEventListener("pointerup", () => (mini.draggingVolume = false));
+		els.volume.addEventListener("pointerdown", (event) => {
+			mini.draggingVolume = true;
+			els.volume.setPointerCapture(event.pointerId);
+		});
+		const stopVolumeDrag = () => { if (mini) mini.draggingVolume = false; };
+		els.volume.addEventListener("pointerup", stopVolumeDrag);
+		els.volume.addEventListener("pointercancel", stopVolumeDrag);
+		els.volume.addEventListener("lostpointercapture", stopVolumeDrag);
 		// Slider then icon: shown icon-first in a row, and as a vertical bar with the icon underneath on portrait screens
 		els.volWrap = h("div", { class: "lpm-volwrap" }, els.volume, els.muteBtn);
 		els.meta = h("div", { class: "lpm-meta" }, h("div", { class: "lpm-metatext" }, els.title, els.artist), els.likeBtn);
@@ -912,16 +923,22 @@
 		if (!mini) return;
 		const { els } = mini;
 		const muted = !!Spicetify.Player.getMute?.();
-		const volume = Math.round((Spicetify.Player.getVolume?.() ?? 0) * 100);
-		if (!mini.draggingVolume) els.volume.value = String(muted ? 0 : volume);
-		els.volume.style.setProperty("--lpm-vol", `${muted ? 0 : volume}%`);
-		const icon = muted || volume === 0 ? ICONS.muted : ICONS.volume;
+		const actualVolume = Math.max(0, Math.min(100, Math.round((Spicetify.Player.getVolume?.() ?? 0) * 100)));
+		if (mini.pendingVolume && (actualVolume === mini.pendingVolume.percent || Date.now() >= mini.pendingVolume.until)) mini.pendingVolume = null;
+		// Spotify acknowledges volume asynchronously. Keep the selected level visible until it arrives, including keyboard changes.
+		const volume = mini.pendingVolume?.percent ?? (muted ? 0 : actualVolume);
+		if (!mini.draggingVolume) els.volume.value = String(volume);
+		els.volume.setAttribute("aria-valuenow", String(volume));
+		els.volume.setAttribute("aria-valuetext", `${volume}%`);
+		els.volume.title = `Volume: ${volume}%`;
+		els.volume.style.setProperty("--lpm-vol", `${volume}%`);
+		const icon = volume === 0 ? ICONS.muted : ICONS.volume;
 		if (els.muteBtn.dataset.icon !== icon) {
 			els.muteBtn.innerHTML = icon;
 			els.muteBtn.dataset.icon = icon;
 		}
-		if (!muted && volume > 0) mini.lastAudibleVolume = volume / 100;
-		const silent = muted || volume === 0;
+		if (actualVolume > 0) mini.lastAudibleVolume = actualVolume / 100;
+		const silent = volume === 0;
 		els.muteBtn.title = silent ? "Unmute" : "Mute";
 		els.muteBtn.setAttribute("aria-label", els.muteBtn.title);
 		els.muteBtn.setAttribute("aria-pressed", String(silent));
