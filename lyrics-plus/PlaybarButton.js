@@ -910,24 +910,55 @@
 	// Shuffle cycles off → shuffle → smart shuffle like Spotify's own button, through Spotify's ShuffleAPI.
 	// Smart shuffle is skipped where Spotify doesn't offer it; without the API it falls back to plain on/off.
 	const SHUFFLE = { OFF: 0, ON: 1, SMART: 2 };
+	const shuffleApi = () => (typeof Spicetify.Platform?.ShuffleAPI?.setShuffle === "function" ? Spicetify.Platform.ShuffleAPI : null);
+	const contextUri = () => Spicetify.Player.data?.context?.uri ?? Spicetify.Player.data?.context_uri ?? null;
+	// What Spotify's ShuffleAPI last said for the playing context: its mode and whether smart shuffle is offered.
+	// Refreshed about once a second, since smart shuffle can't be read reliably from the player state alone.
+	const shuffleState = { uri: null, mode: null, modes: null, busy: false, at: 0, note: "" };
+	function refreshShuffleState(force = false) {
+		const api = shuffleApi();
+		const uri = contextUri();
+		if (!api) shuffleState.note = "smart shuffle unavailable: Spotify's shuffle service wasn't found";
+		if (!api || !uri || shuffleState.busy || (!force && Date.now() - shuffleState.at < 1000)) return;
+		shuffleState.busy = true;
+		shuffleState.at = Date.now();
+		Promise.all([api.getShuffle?.(uri), api.getAvailableShuffleModes?.(uri)])
+			.then(([mode, modes]) => {
+				shuffleState.uri = uri;
+				shuffleState.mode = typeof mode === "number" ? mode : null;
+				shuffleState.modes = Array.isArray(modes) ? modes : null;
+				shuffleState.note = shuffleState.modes && !shuffleState.modes.includes(SHUFFLE.SMART) ? "smart shuffle isn't offered for this" : "";
+			})
+			.catch((error) => {
+				shuffleState.note = `smart shuffle unavailable: ${error?.message ?? error}`;
+			})
+			.finally(() => (shuffleState.busy = false));
+	}
 	function shuffleMode() {
+		if (shuffleState.uri && shuffleState.uri === contextUri() && shuffleState.mode !== null) return shuffleState.mode;
+		const d = Spicetify.Player.data;
 		if (!Spicetify.Player.getShuffle?.()) return SHUFFLE.OFF;
-		return Spicetify.Player.data?.smartShuffle ? SHUFFLE.SMART : SHUFFLE.ON;
+		// Spotify itself counts either flag as smart shuffle
+		return d?.smartShuffle || d?.context?.metadata?.enhanced_context === "true" ? SHUFFLE.SMART : SHUFFLE.ON;
 	}
 	async function cycleShuffle() {
-		const api = Spicetify.Platform?.ShuffleAPI;
-		const uri = Spicetify.Player.data?.context?.uri ?? Spicetify.Player.data?.context_uri;
-		if (typeof api?.setShuffle === "function" && uri) {
+		const api = shuffleApi();
+		const uri = contextUri();
+		if (api && uri) {
 			try {
-				const available = (await api.getAvailableShuffleModes?.(uri)) ?? [SHUFFLE.OFF, SHUFFLE.ON, SHUFFLE.SMART];
-				const order = [SHUFFLE.OFF, SHUFFLE.ON, SHUFFLE.SMART].filter((m) => available.includes(m));
+				const [current, available] = await Promise.all([api.getShuffle?.(uri), api.getAvailableShuffleModes?.(uri)]);
+				const modes = Array.isArray(available) ? available : [SHUFFLE.OFF, SHUFFLE.ON, SHUFFLE.SMART];
+				const order = [SHUFFLE.OFF, SHUFFLE.ON, SHUFFLE.SMART].filter((m) => modes.includes(m));
 				if (order.length > 1) {
-					const next = order[(order.indexOf(shuffleMode()) + 1) % order.length];
+					const now = typeof current === "number" ? current : shuffleMode();
+					const next = order[(order.indexOf(now) + 1) % order.length];
 					await api.setShuffle(uri, next);
+					Object.assign(shuffleState, { uri, mode: next, modes, at: Date.now() });
 					return;
 				}
 			} catch (error) {
 				console.warn("[Lyrics Plus] smart shuffle unavailable, using plain shuffle", error);
+				shuffleState.note = `smart shuffle unavailable: ${error?.message ?? error}`;
 			}
 		}
 		Spicetify.Player.toggleShuffle();
@@ -937,10 +968,11 @@
 	function paintModes() {
 		if (!mini) return;
 		const { els } = mini;
+		refreshShuffleState();
 		const mode = shuffleMode();
 		els.shuffleBtn.classList.toggle("lpm-on", mode !== SHUFFLE.OFF);
 		els.shuffleBtn.setAttribute("aria-pressed", String(mode !== SHUFFLE.OFF));
-		els.shuffleBtn.title = ["Shuffle: off", "Shuffle: on", "Smart shuffle: on"][mode];
+		els.shuffleBtn.title = ["Shuffle: off", "Shuffle: on", "Smart shuffle: on"][mode] + (shuffleState.note ? ` (${shuffleState.note})` : "");
 		const shuffleIcon = mode === SHUFFLE.SMART ? ICONS.smartShuffle : ICONS.shuffle;
 		if (els.shuffleBtn.dataset.icon !== shuffleIcon) {
 			els.shuffleBtn.innerHTML = shuffleIcon;
