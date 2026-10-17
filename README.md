@@ -104,6 +104,8 @@ Related changes are combined under the newest release version.
 
 ### v1.3.0
 
+- Speaker icon stays aligned when hovered in landscape and portrait full screen.
+
 - Centered the landscape volume slider under playback controls; portrait keeps the speaker below its vertical slider. Both show the selected 0–100% level while Spotify acknowledges it, with a percentage tooltip and reliable drag release.
 
 - Fixed mute/unmute on newer Spotify versions by setting volume directly, without relying on Spotify’s renamed volume button. The previous audible level is restored on unmute.

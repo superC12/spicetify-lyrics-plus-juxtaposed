@@ -127,7 +127,8 @@
 		.lpm-dock { flex: 0 0 auto; }
 		.lpm-extras { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 16px 10px; }
 		.lpm-volwrap { position: relative; display: flex; flex-direction: row-reverse; align-items: center; gap: 6px; }
-		.lpm-volwrap .lpm-mute { position: absolute; right: calc(100% + 6px); top: 50%; transform: translateY(-50%); }
+		.lpm .lpm-volwrap .lpm-mute { position: absolute; right: calc(100% + 6px); top: 50%; transform: translateY(-50%); }
+		.lpm .lpm-volwrap .lpm-mute:hover { transform: translateY(-50%) scale(1.06); }
 		.lpm-volume { width: 96px; height: 4px; margin: 0; border-radius: 2px; appearance: none; -webkit-appearance: none; cursor: pointer;
 			background: linear-gradient(to right, #fff var(--lpm-vol, 0%), rgba(255,255,255,.25) var(--lpm-vol, 0%)); }
 		.lpm-volume::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .15s; }
@@ -221,6 +222,7 @@
 		.lpm.lpm-full[data-mode="portrait"] .lpm-extras { padding: 0; }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-volwrap { position: absolute; left: 3.5vw; top: 50%; transform: translateY(-50%); flex-direction: column; gap: 12px; z-index: 1; }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-volwrap .lpm-mute { position: static; transform: none; }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-volwrap .lpm-mute:hover { transform: scale(1.06); }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-volume { writing-mode: vertical-lr; direction: rtl; width: 6px; height: clamp(120px, 18vh, 240px); border-radius: 3px;
 			background: linear-gradient(to top, #fff var(--lpm-vol, 0%), rgba(255,255,255,.25) var(--lpm-vol, 0%)); }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-lyrics { height: auto; min-height: 0; padding-bottom: 20vh; font-size: calc(var(--lpm-font, 18px) * 1.6); text-align: center; }
