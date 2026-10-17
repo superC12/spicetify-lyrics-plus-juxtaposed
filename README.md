@@ -57,7 +57,7 @@ spicetify apply
 ```
 
 > [!NOTE]
-> Based on the Lyrics Plus shipped with Spicetify 2.45.3 and tested on Spotify 1.3.4 on Windows. It does not pick up later fixes to the original automatically. On Spotify 1.3.4 the player bar button only appears when something restores the element names that version removed, which the [Juxtaposed](https://github.com/superC12/spicetify-juxtaposed) theme does.
+> Based on the Lyrics Plus shipped with Spicetify 2.45.3, tested on Spotify 1.3.4 on Windows and checked against 1.3.5. It does not pick up later fixes to the original automatically. On Spotify 1.3.4 and 1.3.5 the player bar button only appears when something restores the element names that version removed, which the [Juxtaposed](https://github.com/superC12/spicetify-juxtaposed) theme does.
 
 ## 💡 Credits and license
 
