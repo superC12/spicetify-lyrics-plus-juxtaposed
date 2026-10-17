@@ -104,6 +104,8 @@ Related changes are combined under the newest release version.
 
 ### v1.3.0
 
+- Long full-screen song titles are limited to two lines, with the full title on hover. A smaller portrait cover and tighter header spacing leave more room for lyrics.
+
 - Speaker icon stays aligned when hovered in landscape and portrait full screen.
 
 - Centered the landscape volume slider under playback controls; portrait keeps the speaker below its vertical slider. Both show the selected 0–100% level while Spotify acknowledges it, with a percentage tooltip and reliable drag release.

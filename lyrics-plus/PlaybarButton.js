@@ -191,7 +191,7 @@
 		.lpm.lpm-full.lpm-nolyrics .lpm-main { grid-template-columns: 1fr; justify-items: center; }
 		.lpm.lpm-full .lpm-side { display: flex; flex-direction: column; align-items: center; gap: 2vh; min-height: 0; }
 		.lpm.lpm-full .lpm-art { width: min(42vh, 32vw); height: min(42vh, 32vw); border-radius: 12px; }
-		.lpm.lpm-full .lpm-title { font-size: clamp(22px, 3.4vw, 54px); white-space: normal; }
+		.lpm.lpm-full .lpm-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; max-height: 2.3em; line-height: 1.15; overflow-wrap: anywhere; font-size: clamp(22px, 3.4vw, 54px); white-space: normal; }
 		.lpm.lpm-full .lpm-artist { font-size: clamp(14px, 1.6vw, 26px); }
 		.lpm.lpm-full .lpm-dock, .lpm.lpm-full .lpm-meta { width: min(42vh, 32vw); }
 		.lpm.lpm-full .lpm-meta { gap: 16px; }
@@ -211,13 +211,13 @@
 		.lpm.lpm-full .lpm-lyrics { display: block; height: 80vh; font-size: calc(var(--lpm-font, 18px) * 1.8); text-align: left; }
 		.lpm.lpm-full.lpm-nolyrics .lpm-lyrics { display: none; }
 		/* Full screen on a tall (portrait) screen: cover, song and controls on top, lyrics below */
-		.lpm.lpm-full[data-mode="portrait"] .lpm-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 4vh; align-items: stretch; padding: 9vh 8vw 0; }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 2.5vh; align-items: stretch; padding: 6vh 8vw 0; }
 		.lpm.lpm-full[data-mode="portrait"].lpm-nolyrics .lpm-main { grid-template-rows: 1fr; align-items: center; }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-side { gap: 1.6vh; }
-		.lpm.lpm-full[data-mode="portrait"] .lpm-art { width: min(34vh, 62vw); height: min(34vh, 62vw); }
-		.lpm.lpm-full[data-mode="portrait"] .lpm-title { font-size: clamp(22px, 5vw, 56px); }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-art { width: min(28vh, 54vw); height: min(28vh, 54vw); }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-title { font-size: clamp(22px, 4vw, 42px); }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-artist { font-size: clamp(14px, 2.6vw, 28px); }
-		.lpm.lpm-full[data-mode="portrait"] .lpm-dock, .lpm.lpm-full[data-mode="portrait"] .lpm-meta { width: max(min(34vh, 62vw), 280px); }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-dock, .lpm.lpm-full[data-mode="portrait"] .lpm-meta { width: max(min(28vh, 54vw), 280px); }
 		/* Portrait: volume as a vertical bar on the left edge with its icon below. It fades with the rest of the controls. */
 		.lpm.lpm-full[data-mode="portrait"] .lpm-extras { padding: 0; }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-volwrap { position: absolute; left: 3.5vw; top: 50%; transform: translateY(-50%); flex-direction: column; gap: 12px; z-index: 1; }
@@ -743,6 +743,7 @@
 			return;
 		}
 		els.title.textContent = meta.title ?? "";
+		els.title.title = els.title.textContent;
 		els.artist.textContent = meta.artist_name ?? "";
 		els.grip.textContent = `${meta.title ?? ""} · ${meta.artist_name ?? ""}`;
 		const cover = coverUrl(meta);
