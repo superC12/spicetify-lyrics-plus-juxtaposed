@@ -65,6 +65,8 @@
 		close: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>',
 		lyrics: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h7"/></svg>',
 		shuffle: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 4h2.2c1.2 0 2.3.6 3 1.6l2.6 4.8c.7 1 1.8 1.6 3 1.6h2.2M12.5 10l2 2-2 2M1.5 12h2.2c1.2 0 2.3-.6 3-1.6M9.3 5.6c.7-1 1.8-1.6 3-1.6h2.2M12.5 2l2 2-2 2"/></svg>',
+		// Smart shuffle: the shuffle arrows, a little smaller, with a sparkle in the corner
+		smartShuffle: '<svg viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" transform="translate(2.6 2.6) scale(.84)"><path d="M1.5 4h2.2c1.2 0 2.3.6 3 1.6l2.6 4.8c.7 1 1.8 1.6 3 1.6h2.2M12.5 10l2 2-2 2M1.5 12h2.2c1.2 0 2.3-.6 3-1.6M9.3 5.6c.7-1 1.8-1.6 3-1.6h2.2M12.5 2l2 2-2 2"/></g><path fill="currentColor" d="M3 0l.8 2.2L6 3l-2.2.8L3 6l-.8-2.2L0 3l2.2-.8z"/></svg>',
 		repeat: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8V6.5A2.5 2.5 0 0 1 4.5 4h9M11.5 2l2 2-2 2M14 8v1.5A2.5 2.5 0 0 1 11.5 12h-9M4.5 10l-2 2 2 2"/></svg>',
 		repeatOne: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8V6.5A2.5 2.5 0 0 1 4.5 4h9M11.5 2l2 2-2 2M14 8v1.5A2.5 2.5 0 0 1 11.5 12h-9M4.5 10l-2 2 2 2"/><path d="M7.4 6.6 8.3 6v4" stroke-width="1.3"/></svg>',
 		heart: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8 13.8 2.6 8.6A3.3 3.3 0 0 1 7.3 3.9L8 4.6l.7-.7a3.3 3.3 0 0 1 4.7 4.7L8 13.8z"/></svg>',
@@ -407,8 +409,8 @@
 		els.track = h("div", { class: "lpm-track", role: "slider", "aria-label": "Seek" }, els.fill);
 		els.progress = h("div", { class: "lpm-progress" }, els.elapsed, els.track, els.remaining);
 		els.playBtn = iconButton("play", "Play", () => Spicetify.Player.togglePlay(), "lpm-ctl lpm-play");
-		els.shuffleBtn = iconButton("shuffle", "Shuffle", () => {
-			Spicetify.Player.toggleShuffle();
+		els.shuffleBtn = iconButton("shuffle", "Shuffle", async () => {
+			await cycleShuffle();
 			setTimeout(paintModes, 150);
 		}, "lpm-ctl lpm-small");
 		els.repeatBtn = iconButton("repeat", "Repeat", () => {
@@ -905,14 +907,45 @@
 		mini.els.playBtn.title = playing ? "Pause" : "Play";
 	}
 
+	// Shuffle cycles off → shuffle → smart shuffle like Spotify's own button, through Spotify's ShuffleAPI.
+	// Smart shuffle is skipped where Spotify doesn't offer it; without the API it falls back to plain on/off.
+	const SHUFFLE = { OFF: 0, ON: 1, SMART: 2 };
+	function shuffleMode() {
+		if (!Spicetify.Player.getShuffle?.()) return SHUFFLE.OFF;
+		return Spicetify.Player.data?.smartShuffle ? SHUFFLE.SMART : SHUFFLE.ON;
+	}
+	async function cycleShuffle() {
+		const api = Spicetify.Platform?.ShuffleAPI;
+		const uri = Spicetify.Player.data?.context?.uri ?? Spicetify.Player.data?.context_uri;
+		if (typeof api?.setShuffle === "function" && uri) {
+			try {
+				const available = (await api.getAvailableShuffleModes?.(uri)) ?? [SHUFFLE.OFF, SHUFFLE.ON, SHUFFLE.SMART];
+				const order = [SHUFFLE.OFF, SHUFFLE.ON, SHUFFLE.SMART].filter((m) => available.includes(m));
+				if (order.length > 1) {
+					const next = order[(order.indexOf(shuffleMode()) + 1) % order.length];
+					await api.setShuffle(uri, next);
+					return;
+				}
+			} catch (error) {
+				console.warn("[Lyrics Plus] smart shuffle unavailable, using plain shuffle", error);
+			}
+		}
+		Spicetify.Player.toggleShuffle();
+	}
+
 	// Shuffle, repeat and like can change from anywhere in Spotify, so they're re-read on every tick
 	function paintModes() {
 		if (!mini) return;
 		const { els } = mini;
-		const shuffle = !!Spicetify.Player.getShuffle?.();
-		els.shuffleBtn.classList.toggle("lpm-on", shuffle);
-		els.shuffleBtn.setAttribute("aria-pressed", String(shuffle));
-		els.shuffleBtn.title = shuffle ? "Shuffle: on" : "Shuffle: off";
+		const mode = shuffleMode();
+		els.shuffleBtn.classList.toggle("lpm-on", mode !== SHUFFLE.OFF);
+		els.shuffleBtn.setAttribute("aria-pressed", String(mode !== SHUFFLE.OFF));
+		els.shuffleBtn.title = ["Shuffle: off", "Shuffle: on", "Smart shuffle: on"][mode];
+		const shuffleIcon = mode === SHUFFLE.SMART ? ICONS.smartShuffle : ICONS.shuffle;
+		if (els.shuffleBtn.dataset.icon !== shuffleIcon) {
+			els.shuffleBtn.innerHTML = shuffleIcon;
+			els.shuffleBtn.dataset.icon = shuffleIcon;
+		}
 		const repeat = Spicetify.Player.getRepeat?.() ?? 0; // 0 off, 1 all, 2 one song
 		els.repeatBtn.classList.toggle("lpm-on", repeat > 0);
 		els.repeatBtn.setAttribute("aria-pressed", String(repeat > 0));
