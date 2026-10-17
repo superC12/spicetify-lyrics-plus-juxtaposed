@@ -17,7 +17,7 @@ A modified copy of the [Lyrics Plus](https://github.com/spicetify/cli/tree/main/
   - **Drag it anywhere** by its top bar, and **resize it** from the bottom-right corner. It remembers where you left it.
   - **Three layouts that follow its size**, like a desktop mini player: **Compact** (short and wide: small cover and controls), **Expanded** (square: big cover) and **Lyrics** (tall: lyrics fill the space).
   - **Keep on top**: pops the mini player out into its own always-on-top window, using the same feature as Spotify's own mini player. Drag it by its top bar, snap it to a corner from the ··· menu, and resize it to switch layouts.
-  - **Full screen**: cover, song and controls on the left, lyrics on the right, covering everything including the player bar. Spotify's own full screen button opens it too. Press Esc to leave.
+  - **Full screen**: cover, song and controls on the left and lyrics on the right (or stacked on a portrait screen), covering everything including the player bar. Spotify's own full screen button opens it too. Press Esc to leave.
   - **Lyrics as written, romanized, or both**: for Japanese, Korean and Chinese songs, show the original, the romanized version (for example "kampeki de usotsuki na kimi wa"), or both, from the ··· menu.
   - **Background**: choose **Dynamic color** (from the cover), **Album cover** (blurred) or **Static color** from the ··· menu, where the lyrics size is too.
 - **Calmer colours.** With "Colorful background" on, the page keeps the song's colour but darkened, so a vivid cover doesn't flood the screen.
@@ -75,6 +75,10 @@ Like Spicetify CLI, it is licensed under the [GNU LGPL v2.1](LICENSE).
 The lyrics pop-up and song-info panel follow ideas from Juxtopposed's video [I Redesigned the ENTIRE Spotify UI from Scratch](https://youtu.be/suhEIUapSJQ). This is a fan project, not made by or affiliated with Juxtopposed, Spotify or the Spicetify team.
 
 ## 📋 Changelog
+
+### v1.2.2
+
+- Fixed full screen on portrait (tall) screens: the cover, song and controls now sit on top with the lyrics below, instead of the lyrics running over them.
 
 ### v1.2.1
 

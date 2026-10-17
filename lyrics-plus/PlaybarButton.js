@@ -146,6 +146,16 @@
 		.lpm.lpm-full .lpm-progress, .lpm.lpm-full .lpm-controls { width: min(42vh, 32vw); padding-left: 0; padding-right: 0; }
 		.lpm.lpm-full .lpm-lyrics { display: block; height: 80vh; font-size: calc(var(--lpm-font, 18px) * 1.8); text-align: left; }
 		.lpm.lpm-full.lpm-nolyrics .lpm-lyrics { display: none; }
+		/* Full screen on a tall (portrait) screen: cover, song and controls on top, lyrics below */
+		.lpm.lpm-full[data-mode="portrait"] .lpm-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 4vh; align-items: stretch; padding: 9vh 8vw 0; }
+		.lpm.lpm-full[data-mode="portrait"].lpm-nolyrics .lpm-main { grid-template-rows: 1fr; align-items: center; }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-side { gap: 1.6vh; }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-art { width: min(34vh, 62vw); height: min(34vh, 62vw); }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-title { font-size: clamp(22px, 5vw, 56px); }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-artist { font-size: clamp(14px, 2.6vw, 28px); }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-progress,
+		.lpm.lpm-full[data-mode="portrait"] .lpm-controls { width: min(56vw, 520px); }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-lyrics { height: auto; min-height: 0; padding-bottom: 20vh; font-size: calc(var(--lpm-font, 18px) * 1.6); text-align: center; }
 		.lpm-side { display: contents; }
 	`;
 	const styleEl = document.createElement("style");
@@ -386,12 +396,14 @@
 		const { root, els } = mini;
 		const w = root.clientWidth;
 		const hgt = root.clientHeight;
+		const full = root.classList.contains("lpm-full");
 		let mode = "lyrics";
-		if (hgt < 230) mode = "compact";
+		// Full screen has its own two layouts, so the mini player's size-based ones never apply to it
+		if (full) mode = hgt > w ? "portrait" : "landscape";
+		else if (hgt < 230) mode = "compact";
 		else if (hgt / Math.max(w, 1) < 1.2) mode = "expanded";
 		root.dataset.mode = mode;
 		// Outside full screen the progress bar and controls sit full width under everything else
-		const full = root.classList.contains("lpm-full");
 		if (full) {
 			if (els.progress.parentElement !== els.side) els.side.append(els.progress, els.controls);
 		} else if (els.progress.parentElement !== root) {
