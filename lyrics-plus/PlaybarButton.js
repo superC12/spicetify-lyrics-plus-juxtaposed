@@ -155,6 +155,15 @@
 		.lpm-ctl svg { width: 16px; height: 16px; }
 		.lpm-ctl.lpm-play { width: 40px; height: 40px; background: #fff; color: #000; }
 		.lpm-ctl:hover { transform: scale(1.06); }
+		/* Buttons press in when clicked. Shuffle and repeat, when on, also sit in a soft tinted circle with a dot
+		   underneath that eases in, so "on" reads by shape and not only by colour. Calmer than the like badge's pop. */
+		.lpm-ctl { position: relative; transition: transform .12s ease, background-color .2s ease, color .2s ease; }
+		.lpm-ctl:not(.lpm-mute):active { transform: scale(.9); }
+		.lpm-ctl.lpm-small.lpm-on { background: color-mix(in srgb, var(--spice-button, #1ed760) 20%, transparent); }
+		.lpm-ctl.lpm-small::after { content: ""; position: absolute; bottom: 1px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%;
+			background: currentColor; opacity: 0; transform: scale(0); transition: opacity .2s ease, transform .2s ease; }
+		.lpm-ctl.lpm-small.lpm-on::after { opacity: 1; transform: scale(1); }
+		.lpm-ctl.lpm-mute::after { display: none; }
 		.lpm-menu { position: absolute; top: 36px; right: 8px; z-index: 5; min-width: 200px; padding: 6px; border-radius: 8px; background: #282828; box-shadow: 0 12px 32px rgba(0,0,0,.6); font-size: 13px; }
 		.lpm-menu h4 { margin: 6px 8px 4px; color: rgba(255,255,255,.6); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 		.lpm-menu button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px; border: 0; border-radius: 4px; background: transparent; color: #fff; font-size: 13px; text-align: left; cursor: pointer; }
@@ -902,9 +911,11 @@
 		const { els } = mini;
 		const shuffle = !!Spicetify.Player.getShuffle?.();
 		els.shuffleBtn.classList.toggle("lpm-on", shuffle);
+		els.shuffleBtn.setAttribute("aria-pressed", String(shuffle));
 		els.shuffleBtn.title = shuffle ? "Shuffle: on" : "Shuffle: off";
 		const repeat = Spicetify.Player.getRepeat?.() ?? 0; // 0 off, 1 all, 2 one song
 		els.repeatBtn.classList.toggle("lpm-on", repeat > 0);
+		els.repeatBtn.setAttribute("aria-pressed", String(repeat > 0));
 		const repeatIcon = repeat === 2 ? ICONS.repeatOne : ICONS.repeat;
 		if (els.repeatBtn.dataset.icon !== repeatIcon) {
 			els.repeatBtn.innerHTML = repeatIcon;
