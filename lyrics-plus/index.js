@@ -1333,6 +1333,29 @@ class LyricsContainer extends react.Component {
 						})
 					)
 				),
+				CONFIG.visual["playbar-button"] &&
+					react.createElement(
+						Spicetify.ReactComponent.TooltipWrapper,
+						{ label: "Mini player" },
+						react.createElement(
+							"button",
+							{
+								className: "lyrics-config-button",
+								onClick: () => window.dispatchEvent(new CustomEvent("lyrics-plus-mini", { detail: "toggle" })),
+							},
+							react.createElement("svg", {
+								width: 16,
+								height: 16,
+								viewBox: "0 0 16 16",
+								fill: "none",
+								stroke: "currentColor",
+								strokeWidth: 1.5,
+								dangerouslySetInnerHTML: {
+									__html: '<rect x="1.5" y="2.5" width="13" height="10" rx="1.5"/><rect x="8" y="7.5" width="5" height="3.5" rx=".6" fill="currentColor" stroke="none"/>',
+								},
+							})
+						)
+					),
 				react.createElement(
 					Spicetify.ReactComponent.TooltipWrapper,
 					{

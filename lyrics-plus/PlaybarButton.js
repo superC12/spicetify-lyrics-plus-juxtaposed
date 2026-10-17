@@ -31,12 +31,24 @@
 	const button = new Spicetify.Playbar.Button(
 		"Lyrics Plus",
 		`<svg role="img" height="16" width="16" aria-hidden="true" viewBox="0 0 16 16" data-encore-id="icon" fill="currentColor"><path d="M13.426 2.574a2.831 2.831 0 0 0-4.797 1.55l3.247 3.247a2.831 2.831 0 0 0 1.55-4.797zM10.5 8.118l-2.619-2.62A63303.13 63303.13 0 0 0 4.74 9.075L2.065 12.12a1.287 1.287 0 0 0 1.816 1.816l3.06-2.688 3.56-3.129zM7.12 4.094a4.331 4.331 0 1 1 4.786 4.786l-3.974 3.493-3.06 2.689a2.787 2.787 0 0 1-3.933-3.933l2.676-3.045 3.505-3.99z"></path></svg>`,
-		// One job everywhere: open or close the mini player. The full lyrics page is in the mini player's ··· menu.
-		() => toggleMini(),
+		// Like Spotify's own lyrics button: open the lyrics page, or go back if it's already open.
+		// Right-click opens the mini player instead.
+		() => {
+			if (Spicetify.Platform.History.location.pathname === LYRICS_PATH) Spicetify.Platform.History.goBack();
+			else Spicetify.Platform.History.push(LYRICS_PATH);
+		},
 		false,
-		false,
+		Spicetify.Platform.History.location.pathname === LYRICS_PATH,
 		false
 	);
+	button.element?.addEventListener("contextmenu", (e) => {
+		e.preventDefault();
+		toggleMini();
+	});
+	button.label = "Lyrics (right-click for the mini player)";
+	Spicetify.Platform.History.listen((location) => {
+		button.active = location.pathname === LYRICS_PATH;
+	});
 
 	// ------------------------------------------------------------------ styles
 	// One stylesheet, used in Spotify's window and copied into the pinned (always-on-top) window.
@@ -351,7 +363,6 @@
 		mini.timer = setInterval(tick, 250);
 		onSong();
 		paintPlayState();
-		button.active = true;
 	}
 
 	function closeMini() {
@@ -367,7 +378,6 @@
 		Spicetify.Player.removeEventListener("onplaypause", paintPlayState);
 		mini.root.remove();
 		mini = null;
-		button.active = false;
 	}
 
 	// Pick Compact, Expanded or Lyrics from the player's own size, like a desktop mini player
@@ -880,6 +890,8 @@
 		if (e.detail === "fullscreen") {
 			if (mini?.root.classList.contains("lpm-full")) exitFullscreen();
 			else openFullscreen();
+		} else if (e.detail === "toggle") {
+			toggleMini();
 		}
 	});
 })();

@@ -12,7 +12,8 @@ A modified copy of the [Lyrics Plus](https://github.com/spicetify/cli/tree/main/
 
 - **Song-info panel.** The lyrics page shows a large cover with the title, artist and album beside the lyrics. Windows narrower than 1100px keep the original full-width layout.
 - **A− / A+ buttons.** Change the lyrics size in one click. Ctrl + mouse wheel still works.
-- **Mini player.** The player bar's lyrics button opens and closes a mini player with the cover, song, progress bar, playback controls and synced lyrics. Click a line to jump to it. It does the same thing on every page, and replaces the separate Lyrics icon in the top bar; the full lyrics page is in its ··· menu.
+- **One lyrics button.** The player bar's lyrics button opens the lyrics page and takes you back when clicked again, like Spotify's own. It replaces the separate Lyrics icon in the top bar.
+- **Mini player.** Right-click the lyrics button, or use the mini player button on the lyrics page, for a mini player with the cover, song, progress bar, playback controls and synced lyrics. Click a line to jump to it.
   - **Drag it anywhere** by its top bar, and **resize it** from the bottom-right corner. It remembers where you left it.
   - **Three layouts that follow its size**, like a desktop mini player: **Compact** (short and wide: small cover and controls), **Expanded** (square: big cover) and **Lyrics** (tall: lyrics fill the space).
   - **Keep on top**: pops the mini player out into its own always-on-top window, using the same feature as Spotify's own mini player. Drag it by its top bar, snap it to a corner from the ··· menu, and resize it to switch layouts.
@@ -74,6 +75,10 @@ Like Spicetify CLI, it is licensed under the [GNU LGPL v2.1](LICENSE).
 The lyrics pop-up and song-info panel follow ideas from Juxtopposed's video [I Redesigned the ENTIRE Spotify UI from Scratch](https://youtu.be/suhEIUapSJQ). This is a fan project, not made by or affiliated with Juxtopposed, Spotify or the Spicetify team.
 
 ## 📋 Changelog
+
+### v1.2.1
+
+- The lyrics button opens the lyrics page again, like Spotify's own. The mini player is now on right-click and on a button on the lyrics page.
 
 ### v1.2.0
 
