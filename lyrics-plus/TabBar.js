@@ -125,7 +125,10 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 
 	useEffect(() => {
 		if (!tabBarRef.current) return;
-		setAvailableSpace(tabBarRef.current.clientWidth);
+		// Measure the slot the tabs sit in, not the list itself: the list shrinks when items move into "More",
+		// which made the tabs flip between the full bar and the dropdown on every re-render
+		const host = tabBarRef.current.closest(".main-topBar-topbarContentWrapper") ?? tabBarRef.current.parentElement;
+		setAvailableSpace(Math.max(tabBarRef.current.clientWidth, (host?.clientWidth ?? 0) - 48));
 	}, [windowSize]);
 
 	useEffect(() => {

@@ -12,7 +12,12 @@ A modified copy of the [Lyrics Plus](https://github.com/spicetify/cli/tree/main/
 
 - **Song-info panel.** The lyrics page shows a large cover with the title, artist and album beside the lyrics. Windows narrower than 1100px keep the original full-width layout.
 - **A− / A+ buttons.** Change the lyrics size in one click. Ctrl + mouse wheel still works.
-- **Lyrics pop-up.** The player bar's lyrics button opens a small window above the bar, so you can read along without leaving the page you're on. It highlights the current line, jumps to a line when you click it, has its own text size, and has a button to open the full lyrics page.
+- **Mini player.** The player bar's lyrics button opens a mini player with the cover, song, progress bar, playback controls and synced lyrics. Click a line to jump to it.
+  - **Drag it anywhere** by its top bar, and **resize it** from the bottom-right corner. It remembers where you left it.
+  - **Three layouts that follow its size**, like a desktop mini player: **Compact** (short and wide: small cover and controls), **Expanded** (square: big cover) and **Lyrics** (tall: lyrics fill the space).
+  - **Keep on top**: pops the mini player out into its own always-on-top window, using the same feature as Spotify's own mini player. Resize that window to switch layouts.
+  - **Full screen**: cover, song and controls on the left, lyrics on the right, in true full screen. Press Esc to leave.
+  - **Background**: choose **Dynamic color** (from the cover), **Album cover** (blurred) or **Static color** from the ··· menu, where the lyrics size is too.
 - **Calmer colours.** With "Colorful background" on, the page keeps the song's colour but darkened, so a vivid cover doesn't flood the screen.
 - **Player bar button on by default.** It replaces Spotify's own lyrics button. Turn it off under **Lyrics Plus config**.
 
@@ -68,6 +73,11 @@ Like Spicetify CLI, it is licensed under the [GNU LGPL v2.1](LICENSE).
 The lyrics pop-up and song-info panel follow ideas from Juxtopposed's video [I Redesigned the ENTIRE Spotify UI from Scratch](https://youtu.be/suhEIUapSJQ). This is a fan project, not made by or affiliated with Juxtopposed, Spotify or the Spicetify team.
 
 ## 📋 Changelog
+
+### v1.1.0
+
+- The lyrics pop-up is now a mini player: draggable, resizable, with playback controls, Compact / Expanded / Lyrics layouts, keep-on-top, full screen and a choice of background.
+- Fixed the mode tabs (Karaoke, Synced, Unsynced) flipping between tabs and a dropdown whenever the page re-rendered, for example when changing the text size.
 
 ### v1.0.1
 
