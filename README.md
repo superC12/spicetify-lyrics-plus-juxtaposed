@@ -61,13 +61,18 @@ spicetify apply
 
 ## 💡 Credits and license
 
-Lyrics Plus is part of [Spicetify CLI](https://github.com/spicetify/cli), written by its contributors. This repo changes `index.js`, `Settings.js`, `PlaybarButton.js` and `style.css`; every other file in `lyrics-plus` is unmodified.
+Lyrics Plus is part of [Spicetify CLI](https://github.com/spicetify/cli), written by its contributors. This repo changes `index.js`, `Settings.js`, `PlaybarButton.js`, `Pages.js`, `TabBar.js`, `Utils.js` and `style.css`; every other file in `lyrics-plus` is unmodified.
 
 Like Spicetify CLI, it is licensed under the [GNU LGPL v2.1](LICENSE).
 
 The lyrics pop-up and song-info panel follow ideas from Juxtopposed's video [I Redesigned the ENTIRE Spotify UI from Scratch](https://youtu.be/suhEIUapSJQ). This is a fan project, not made by or affiliated with Juxtopposed, Spotify or the Spicetify team.
 
 ## 📋 Changelog
+
+### v1.0.1
+
+- Fixed the lyrics page crashing with "Something went wrong" on Spotify 1.3.4 and later. Lyrics Plus looked for parts of the page that Spotify removed in that version.
+- If the page does crash, it now shows the error with a **Copy details** button instead of a blank page.
 
 ### v1.0.0
 

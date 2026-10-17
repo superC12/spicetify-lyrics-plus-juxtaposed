@@ -1,4 +1,16 @@
 const Utils = {
+	// Spotify 1.3.4 dropped the "Root__main-view" name, so fall back to the elements it still has
+	mainView() {
+		return document.querySelector(".Root__main-view") ?? document.querySelector("#main-view") ?? document.querySelector("main");
+	},
+	scrollNode() {
+		return (
+			document.querySelector(".Root__main-view .os-viewport") ??
+			document.querySelector(".main-view-container .os-viewport") ??
+			document.querySelector(".main-view-container__scroll-node") ??
+			Utils.mainView()
+		);
+	},
 	addQueueListener(callback) {
 		Spicetify.Player.origin._events.addListener("queue_update", callback);
 	},

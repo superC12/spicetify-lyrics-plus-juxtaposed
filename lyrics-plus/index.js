@@ -11,7 +11,39 @@ const spotifyVersion = Spicetify.Platform.version;
 // Define a function called "render" to specify app entry point
 // This function will be used to mount app to main view.
 function render() {
-	return react.createElement(LyricsContainer, null);
+	return react.createElement(LyricsErrorBoundary, null, react.createElement(LyricsContainer, null));
+}
+
+// Show what went wrong instead of Spotify's blank "Something went wrong" page, so problems can be reported
+class LyricsErrorBoundary extends react.Component {
+	constructor(props) {
+		super(props);
+		this.state = { error: null, info: null };
+	}
+	static getDerivedStateFromError(error) {
+		return { error };
+	}
+	componentDidCatch(error, info) {
+		console.error("[Lyrics Plus]", error, info);
+		this.setState({ info });
+	}
+	render() {
+		if (!this.state.error) return this.props.children;
+		const details = `${this.state.error?.stack ?? this.state.error}\n${this.state.info?.componentStack ?? ""}`.trim().slice(0, 4000);
+		return react.createElement(
+			"div",
+			{ style: { padding: "48px", maxWidth: "900px", margin: "0 auto" } },
+			react.createElement("h2", { style: { marginBottom: "8px" } }, "Lyrics Plus hit an error"),
+			react.createElement("p", { style: { opacity: 0.7, marginBottom: "16px" } }, `Spotify ${Spicetify.Platform?.version ?? ""}. Copy the details below into a bug report.`),
+			react.createElement(
+				"div",
+				{ style: { display: "flex", gap: "8px", marginBottom: "16px" } },
+				react.createElement("button", { className: "lyrics-config-button", style: { width: "auto", padding: "0 14px" }, onClick: () => Spicetify.Platform.ClipboardAPI.copy(details) }, "Copy details"),
+				react.createElement("button", { className: "lyrics-config-button", style: { width: "auto", padding: "0 14px" }, onClick: () => this.setState({ error: null, info: null }) }, "Try again")
+			),
+			react.createElement("pre", { style: { whiteSpace: "pre-wrap", fontSize: "12px", opacity: 0.8, userSelect: "text" } }, details)
+		);
+	}
 }
 
 function getConfig(name, defaultVal = true) {
@@ -953,7 +985,7 @@ class LyricsContainer extends react.Component {
 			this.state.explicitMode = this.state.lockMode;
 			this.currentTrackUri = queue.current.uri;
 			this.fetchLyrics(queue.current, this.state.explicitMode);
-			this.viewPort.scrollTo(0, 0);
+			this.viewPort?.scrollTo(0, 0);
 
 			// Fetch next track
 			const nextTrack = queue.queued?.[0] || queue.nextUp?.[0];
@@ -998,8 +1030,7 @@ class LyricsContainer extends react.Component {
 			this.fetchLyrics(Spicetify.Player.data.item, this.state.explicitMode, true);
 		};
 
-		this.viewPort =
-			document.querySelector(".Root__main-view .os-viewport") ?? document.querySelector(".Root__main-view .main-view-container__scroll-node");
+		this.viewPort = Utils.scrollNode();
 
 		this.configButton = new Spicetify.Menu.Item("Lyrics Plus config", false, openConfig, "lyrics");
 		this.configButton.register();
