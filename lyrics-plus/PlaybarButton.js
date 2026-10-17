@@ -31,13 +31,10 @@
 	const button = new Spicetify.Playbar.Button(
 		"Lyrics Plus",
 		`<svg role="img" height="16" width="16" aria-hidden="true" viewBox="0 0 16 16" data-encore-id="icon" fill="currentColor"><path d="M13.426 2.574a2.831 2.831 0 0 0-4.797 1.55l3.247 3.247a2.831 2.831 0 0 0 1.55-4.797zM10.5 8.118l-2.619-2.62A63303.13 63303.13 0 0 0 4.74 9.075L2.065 12.12a1.287 1.287 0 0 0 1.816 1.816l3.06-2.688 3.56-3.129zM7.12 4.094a4.331 4.331 0 1 1 4.786 4.786l-3.974 3.493-3.06 2.689a2.787 2.787 0 0 1-3.933-3.933l2.676-3.045 3.505-3.99z"></path></svg>`,
-		() => {
-			// On the full lyrics page the button takes you back; anywhere else it toggles the mini player
-			if (Spicetify.Platform.History.location.pathname === LYRICS_PATH) Spicetify.Platform.History.goBack();
-			else toggleMini();
-		},
+		// One job everywhere: open or close the mini player. The full lyrics page is in the mini player's ··· menu.
+		() => toggleMini(),
 		false,
-		Spicetify.Platform.History.location.pathname === LYRICS_PATH,
+		false,
 		false
 	);
 
@@ -102,6 +99,11 @@
 		.lpm-menu button:hover { background: rgba(255,255,255,.1); }
 		.lpm-menu button.lpm-on::after { content: "✓"; margin-left: auto; color: var(--spice-button, #1ed760); }
 		.lpm-menu .lpm-row { display: flex; gap: 4px; padding: 2px 4px; }
+		.lpm-menu .lpm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+		.lpm-menu .lpm-grid button { padding: 6px 8px; font-size: 12px; }
+		.lpm-menu { max-height: calc(100% - 44px); overflow-y: auto; }
+		.lpm-roman { display: block; margin-top: .15em; font-size: .62em; font-weight: 600; opacity: .8; }
+		.lpm-line.lpm-romanonly .lpm-roman { margin: 0; font-size: 1em; font-weight: 700; opacity: 1; }
 		.lpm-menu .lpm-row button { justify-content: center; }
 
 		/* Compact: one row, small cover, no lyrics */
@@ -144,26 +146,38 @@
 	`;
 	hideSpotifyButton.classList.add("lyrics-plus:visual:playbar-button");
 
-	// On by default; only an explicit "false" turns it off
-	if (Spicetify.LocalStorage.get("lyrics-plus:visual:playbar-button") !== "false") setPlaybarButton();
-	window.addEventListener("lyrics-plus", (event) => {
-		if (event.detail?.name === "playbar-button") event.detail.value ? setPlaybarButton() : removePlaybarButton();
-	});
-
-	Spicetify.Platform.History.listen((location) => {
-		button.active = location.pathname === LYRICS_PATH || !!mini;
-	});
+	// With the player bar button on, the separate "Lyrics" icon in the top bar is a duplicate, so hide it.
+	// Spicetify gives these icons no stable hook, so match the app's name in any of its languages.
+	const APP_NAMES = new Set(["Lyrics", "Dalszöveg", "Letra", "Letras", "Lirik", "Låttext", "Lời bài hát", "Paroles", "Sanat", "Songteksten", "Songtext", "Tekst", "Text", "Şarkı Sözleri", "Στίχοι", "Текст", "الكلمات", "เนื้อเพลง", "歌詞", "歌词"]);
+	let hideNavIcon = false;
+	function syncNavIcon() {
+		for (const el of document.querySelectorAll(".custom-navlinks-scrollable_container button, .custom-navlinks-scrollable_container a")) {
+			const label = el.getAttribute("aria-label") ?? el.getAttribute("title") ?? "";
+			if (APP_NAMES.has(label.trim())) el.style.display = hideNavIcon ? "none" : "";
+		}
+	}
+	new MutationObserver(() => hideNavIcon && syncNavIcon()).observe(document.body, { childList: true, subtree: true });
 
 	function setPlaybarButton() {
 		document.head.appendChild(hideSpotifyButton);
 		button.register();
+		hideNavIcon = true;
+		syncNavIcon();
 	}
 
 	function removePlaybarButton() {
 		closeMini();
 		hideSpotifyButton.remove();
 		button.deregister();
+		hideNavIcon = false;
+		syncNavIcon();
 	}
+
+	// On by default; only an explicit "false" turns it off
+	if (Spicetify.LocalStorage.get("lyrics-plus:visual:playbar-button") !== "false") setPlaybarButton();
+	window.addEventListener("lyrics-plus", (event) => {
+		if (event.detail?.name === "playbar-button") event.detail.value ? setPlaybarButton() : removePlaybarButton();
+	});
 
 	// ------------------------------------------------------------------ helpers
 
@@ -342,6 +356,7 @@
 
 	function closeMini() {
 		if (!mini) return;
+		openedForFullscreen = false;
 		if (mini.root.classList.contains("lpm-full")) exitFullscreen();
 		const pip = mini.pip;
 		mini.pip = null;
@@ -352,7 +367,7 @@
 		Spicetify.Player.removeEventListener("onplaypause", paintPlayState);
 		mini.root.remove();
 		mini = null;
-		button.active = Spicetify.Platform.History.location.pathname === LYRICS_PATH;
+		button.active = false;
 	}
 
 	// Pick Compact, Expanded or Lyrics from the player's own size, like a desktop mini player
@@ -386,7 +401,8 @@
 	function makeDraggable() {
 		const { root, els } = mini;
 		els.bar.addEventListener("pointerdown", (e) => {
-			if (mini?.pip || root.classList.contains("lpm-full") || e.target.closest("button")) return;
+			if (root.classList.contains("lpm-full") || e.target.closest("button")) return;
+			if (mini?.pip) return dragPinnedWindow(e);
 			const startX = e.clientX - root.offsetLeft;
 			const startY = e.clientY - root.offsetTop;
 			els.bar.setPointerCapture(e.pointerId);
@@ -405,6 +421,54 @@
 		});
 	}
 	window.addEventListener("resize", clampIntoView);
+
+	// The pinned window has no title bar of its own, so its top bar moves the whole window (as Spotify's own mini player does)
+	function dragPinnedWindow(e) {
+		const pip = mini.pip;
+		const bar = mini.els.bar;
+		const offsetX = e.screenX - pip.screenX;
+		const offsetY = e.screenY - pip.screenY;
+		bar.setPointerCapture(e.pointerId);
+		const move = (ev) => {
+			try {
+				pip.moveTo(ev.screenX - offsetX, ev.screenY - offsetY);
+			} catch {
+				// moving isn't allowed here; nothing else to do
+			}
+		};
+		const up = () => {
+			bar.removeEventListener("pointermove", move);
+			bar.removeEventListener("pointerup", up);
+			store.set("pipCorner", "custom");
+			store.set("pipPos", { x: pip.screenX, y: pip.screenY });
+		};
+		bar.addEventListener("pointermove", move);
+		bar.addEventListener("pointerup", up);
+	}
+
+	function placePinnedWindow() {
+		const pip = mini?.pip;
+		if (!pip) return;
+		const corner = store.get("pipCorner", "bottom-right");
+		const margin = 16;
+		const sx = screen.availLeft ?? 0;
+		const sy = screen.availTop ?? 0;
+		let x;
+		let y;
+		if (corner === "custom") {
+			const pos = store.get("pipPos", null);
+			if (!pos) return;
+			({ x, y } = pos);
+		} else {
+			x = corner.endsWith("left") ? sx + margin : sx + screen.availWidth - pip.outerWidth - margin;
+			y = corner.startsWith("top") ? sy + margin : sy + screen.availHeight - pip.outerHeight - margin;
+		}
+		try {
+			pip.moveTo(x, y);
+		} catch {
+			// the window stays where the system put it
+		}
+	}
 
 	// ------------------------------------------------------------- settings menu
 
@@ -432,15 +496,36 @@
 			store.set("font", next);
 			mini.root.style.setProperty("--lpm-font", `${next}px`);
 		};
+		const script = store.get("script", "original");
+		const pickScript = (id) => {
+			store.set("script", id);
+			toggleMenu();
+			renderLyrics();
+		};
+		const corner = store.get("pipCorner", "bottom-right");
+		const pickCorner = (id) => {
+			store.set("pipCorner", id);
+			toggleMenu();
+			placePinnedWindow();
+		};
+		const CORNERS = [
+			["top-left", "Top left"],
+			["top-right", "Top right"],
+			["bottom-left", "Bottom left"],
+			["bottom-right", "Bottom right"],
+		];
 		mini.menu = h(
 			"div",
 			{ class: "lpm-menu", role: "menu" },
+			h("h4", {}, "Lyrics"),
+			SCRIPTS.map(([id, label]) => h("button", { type: "button", class: id === script ? "lpm-on" : "", onclick: () => pickScript(id) }, label)),
+			h("div", { class: "lpm-row" }, h("button", { type: "button", title: "Smaller lyrics", onclick: () => font(-1) }, "A−"), h("button", { type: "button", title: "Larger lyrics", onclick: () => font(1) }, "A+")),
 			h("h4", {}, "Background"),
 			BACKGROUNDS.map((b) => h("button", { type: "button", class: b.id === current ? "lpm-on" : "", onclick: () => pick(b.id) }, b.label)),
-			h("h4", {}, "Lyrics size"),
-			h("div", { class: "lpm-row" }, h("button", { type: "button", onclick: () => font(-1) }, "A−"), h("button", { type: "button", onclick: () => font(1) }, "A+")),
+			h("h4", {}, "Kept-on-top window"),
+			h("div", { class: "lpm-grid" }, CORNERS.map(([id, label]) => h("button", { type: "button", class: id === corner ? "lpm-on" : "", onclick: () => pickCorner(id) }, label))),
 			h("h4", {}, "More"),
-			h("button", { type: "button", onclick: () => { toggleMenu(); Spicetify.Platform.History.push(LYRICS_PATH); } }, "Open full lyrics page")
+			h("button", { type: "button", onclick: () => { toggleMenu(); if (mini?.pip) unpin(); Spicetify.Platform.History.push(LYRICS_PATH); } }, "Open full lyrics page")
 		);
 		mini.root.appendChild(mini.menu);
 	}
@@ -503,18 +588,114 @@
 			return;
 		}
 		mini.lines = result;
+		renderLyrics();
+	}
+
+	// Draw the lyrics in the chosen script: as written, romanized, or both (romanized under the original)
+	async function renderLyrics() {
+		if (!mini || !mini.lines.length) return;
+		const { els } = mini;
+		const lines = mini.lines;
+		const script = store.get("script", "original");
+		let roman = null;
+		if (script !== "original") {
+			try {
+				roman = await romanizeLines(lines.map((l) => l.text ?? ""));
+			} catch (error) {
+				console.warn("[Lyrics Plus] romanization failed", error);
+			}
+			if (!mini || mini.lines !== lines) return; // the song changed meanwhile
+		}
 		mini.activeIndex = -1;
-		const synced = result.some((l) => l.startTime !== null);
+		const synced = lines.some((l) => l.startTime !== null);
 		els.lyrics.classList.toggle("lpm-static", !synced);
 		els.lyrics.replaceChildren();
-		mini.lineEls = result.map((line) => {
-			const el = h("p", { class: `lpm-line${line.startTime !== null ? " lpm-synced" : ""}` }, line.text || "♪");
+		mini.lineEls = lines.map((line, i) => {
+			const romanText = roman?.[i] && roman[i] !== line.text ? roman[i] : null;
+			const onlyRoman = script === "romanized" && romanText;
+			const el = h(
+				"p",
+				{ class: `lpm-line${line.startTime !== null ? " lpm-synced" : ""}${onlyRoman ? " lpm-romanonly" : ""}` },
+				onlyRoman ? null : line.text || "♪",
+				romanText ? h("span", { class: "lpm-roman" }, romanText) : null
+			);
 			if (line.startTime !== null) el.addEventListener("click", () => Spicetify.Player.seek(line.startTime));
 			els.lyrics.appendChild(el);
 			return el;
 		});
 		els.lyrics.scrollTop = 0;
 		tick();
+	}
+
+	// ------------------------------------------------------------- romanization
+	// The same libraries the full Lyrics Plus page uses, loaded only when a song needs them.
+
+	const SCRIPTS = [
+		["original", "As written"],
+		["romanized", "Romanized"],
+		["both", "Both"],
+	];
+	const LIBS = {
+		kuroshiro: "https://cdn.jsdelivr.net/npm/kuroshiro@1.2.0/dist/kuroshiro.min.js",
+		kuromoji: "https://cdn.jsdelivr.net/npm/kuroshiro-analyzer-kuromoji@1.1.0/dist/kuroshiro-analyzer-kuromoji.min.js",
+		aromanize: "https://cdn.jsdelivr.net/npm/aromanize@0.1.5/aromanize.min.js",
+		pinyin: "https://cdn.jsdelivr.net/npm/pinyin-pro@3.28.1/dist/index.min.js",
+	};
+	// kuromoji joins paths in a way that turns "https://" into "https:/"; the full page applies the same fix
+	const DICT_PATH = "https:/cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict";
+
+	// Callers check the library's global first, so an existing tag here means it is still loading
+	function loadScript(url) {
+		return new Promise((resolve, reject) => {
+			const existing = document.querySelector(`script[src="${url}"]`);
+			const script = existing ?? document.createElement("script");
+			script.addEventListener("load", () => resolve());
+			script.addEventListener("error", reject);
+			if (!existing) {
+				script.src = url;
+				document.head.appendChild(script);
+			}
+		});
+	}
+
+	let kuroshiro = null;
+	async function japanese() {
+		if (kuroshiro) return kuroshiro;
+		if (typeof XMLHttpRequest.prototype.realOpen === "undefined") {
+			XMLHttpRequest.prototype.realOpen = XMLHttpRequest.prototype.open;
+			XMLHttpRequest.prototype.open = function (method, url, bool) {
+				if (url.indexOf(DICT_PATH) === 0) this.realOpen(method, url.replace("https:/", "https://"), bool);
+				else this.realOpen(method, url, bool);
+			};
+		}
+		if (typeof window.Kuroshiro === "undefined") await loadScript(LIBS.kuroshiro);
+		if (typeof window.KuromojiAnalyzer === "undefined") await loadScript(LIBS.kuromoji);
+		const instance = new window.Kuroshiro.default();
+		await instance.init(new window.KuromojiAnalyzer({ dictPath: DICT_PATH }));
+		kuroshiro = instance;
+		return kuroshiro;
+	}
+
+	const HAS_KANA = /[぀-ヿ]/;
+	const HAS_HAN = /[一-鿿]/;
+	const HAS_HANGUL = /[가-힯]/;
+
+	async function romanizeLines(texts) {
+		const all = texts.join("\n");
+		// Kana means Japanese (kanji included); Han characters without kana mean Chinese
+		if (HAS_KANA.test(all)) {
+			const k = await japanese();
+			return Promise.all(texts.map((t) => (HAS_KANA.test(t) || HAS_HAN.test(t) ? k.convert(t, { to: "romaji", mode: "spaced" }) : t)));
+		}
+		if (HAS_HANGUL.test(all)) {
+			if (typeof window.Aromanize === "undefined") await loadScript(LIBS.aromanize);
+			return texts.map((t) => (HAS_HANGUL.test(t) ? window.Aromanize.hangulToLatin(t, "rr-translit") : t));
+		}
+		if (HAS_HAN.test(all)) {
+			if (typeof window.pinyinPro === "undefined") await loadScript(LIBS.pinyin);
+			return texts.map((t) => (HAS_HAN.test(t) ? window.pinyinPro.pinyin(t, { toneType: "symbol", nonZh: "consecutive" }) : t));
+		}
+		return texts; // already in Latin script
 	}
 
 	function showMessage(text) {
@@ -588,6 +769,7 @@
 			pip.document.title = mini.els.grip.textContent;
 			// Resizing the pinned window switches between Compact, Expanded and Lyrics
 			pip.addEventListener("resize", layoutForMode);
+			placePinnedWindow();
 			pip.document.addEventListener("pointerdown", (e) => {
 				if (mini?.menu && !mini.menu.contains(e.target) && !mini.els.moreBtn.contains(e.target)) toggleMenu();
 			});
@@ -637,8 +819,26 @@
 		}
 	}
 
+	// Full screen started from Spotify's own full screen button, or the lyrics page, opens the player just for
+	// that; leaving full screen then closes it again instead of leaving a mini player behind
+	let openedForFullscreen = false;
+	function openFullscreen() {
+		if (!mini) {
+			openMini();
+			openedForFullscreen = true;
+		}
+		if (mini.pip) unpin();
+		enterFullscreen();
+	}
+
 	function exitFullscreen() {
 		if (!mini) return;
+		if (openedForFullscreen) {
+			openedForFullscreen = false;
+			if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+			closeMini();
+			return;
+		}
 		mini.root.classList.remove("lpm-full");
 		mini.els.fullBtn.innerHTML = ICONS.full;
 		mini.els.fullBtn.title = "Full screen";
@@ -659,5 +859,27 @@
 	);
 	document.addEventListener("pointerdown", (e) => {
 		if (mini?.menu && !mini.menu.contains(e.target) && !mini.els.moreBtn.contains(e.target)) toggleMenu();
+	});
+
+	// Spotify's own full screen button (bottom right) opens this full screen view instead of Spotify's,
+	// while the player bar button is on. Captured before Spotify handles the click.
+	document.addEventListener(
+		"click",
+		(e) => {
+			if (!hideNavIcon || !(e.target instanceof Element)) return;
+			if (!e.target.closest('[data-testid="fullscreen-mode-button"]')) return;
+			e.preventDefault();
+			e.stopPropagation();
+			if (mini?.root.classList.contains("lpm-full")) exitFullscreen();
+			else openFullscreen();
+		},
+		true
+	);
+	// The full lyrics page's own full screen key asks for this view too
+	window.addEventListener("lyrics-plus-mini", (e) => {
+		if (e.detail === "fullscreen") {
+			if (mini?.root.classList.contains("lpm-full")) exitFullscreen();
+			else openFullscreen();
+		}
 	});
 })();

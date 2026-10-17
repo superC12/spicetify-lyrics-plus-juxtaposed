@@ -1053,6 +1053,11 @@ class LyricsContainer extends react.Component {
 		};
 
 		this.toggleFullscreen = () => {
+			// The mini player's full screen view replaces the old one when the player bar button is on
+			if (CONFIG.visual["playbar-button"]) {
+				window.dispatchEvent(new CustomEvent("lyrics-plus-mini", { detail: "fullscreen" }));
+				return;
+			}
 			const isEnabled = !this.state.isFullscreen;
 			if (isEnabled) {
 				document.body.append(this.fullscreenContainer);

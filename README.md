@@ -12,11 +12,12 @@ A modified copy of the [Lyrics Plus](https://github.com/spicetify/cli/tree/main/
 
 - **Song-info panel.** The lyrics page shows a large cover with the title, artist and album beside the lyrics. Windows narrower than 1100px keep the original full-width layout.
 - **A− / A+ buttons.** Change the lyrics size in one click. Ctrl + mouse wheel still works.
-- **Mini player.** The player bar's lyrics button opens a mini player with the cover, song, progress bar, playback controls and synced lyrics. Click a line to jump to it.
+- **Mini player.** The player bar's lyrics button opens and closes a mini player with the cover, song, progress bar, playback controls and synced lyrics. Click a line to jump to it. It does the same thing on every page, and replaces the separate Lyrics icon in the top bar; the full lyrics page is in its ··· menu.
   - **Drag it anywhere** by its top bar, and **resize it** from the bottom-right corner. It remembers where you left it.
   - **Three layouts that follow its size**, like a desktop mini player: **Compact** (short and wide: small cover and controls), **Expanded** (square: big cover) and **Lyrics** (tall: lyrics fill the space).
-  - **Keep on top**: pops the mini player out into its own always-on-top window, using the same feature as Spotify's own mini player. Resize that window to switch layouts.
-  - **Full screen**: cover, song and controls on the left, lyrics on the right, in true full screen. Press Esc to leave.
+  - **Keep on top**: pops the mini player out into its own always-on-top window, using the same feature as Spotify's own mini player. Drag it by its top bar, snap it to a corner from the ··· menu, and resize it to switch layouts.
+  - **Full screen**: cover, song and controls on the left, lyrics on the right, covering everything including the player bar. Spotify's own full screen button opens it too. Press Esc to leave.
+  - **Lyrics as written, romanized, or both**: for Japanese, Korean and Chinese songs, show the original, the romanized version (for example "kampeki de usotsuki na kimi wa"), or both, from the ··· menu.
   - **Background**: choose **Dynamic color** (from the cover), **Album cover** (blurred) or **Static color** from the ··· menu, where the lyrics size is too.
 - **Calmer colours.** With "Colorful background" on, the page keeps the song's colour but darkened, so a vivid cover doesn't flood the screen.
 - **Player bar button on by default.** It replaces Spotify's own lyrics button. Turn it off under **Lyrics Plus config**.
@@ -73,6 +74,13 @@ Like Spicetify CLI, it is licensed under the [GNU LGPL v2.1](LICENSE).
 The lyrics pop-up and song-info panel follow ideas from Juxtopposed's video [I Redesigned the ENTIRE Spotify UI from Scratch](https://youtu.be/suhEIUapSJQ). This is a fan project, not made by or affiliated with Juxtopposed, Spotify or the Spicetify team.
 
 ## 📋 Changelog
+
+### v1.2.0
+
+- The player bar button now does one thing everywhere: open or close the mini player. The duplicate Lyrics icon in the top bar is hidden while it's on.
+- The kept-on-top window can be dragged by its top bar or snapped to a corner.
+- Full screen now covers the whole screen, including the player bar, matches the chosen background, and is also what Spotify's own full screen button opens.
+- New lyrics option: as written, romanized, or both.
 
 ### v1.1.0
 
