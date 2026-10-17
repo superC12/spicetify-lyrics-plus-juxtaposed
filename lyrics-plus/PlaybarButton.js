@@ -64,6 +64,13 @@
 		exitFull: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5.5 1.5v4h-4M14.5 5.5h-4v-4M10.5 14.5v-4h4M1.5 10.5h4v4"/></svg>',
 		close: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>',
 		lyrics: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h7"/></svg>',
+		shuffle: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 4h2.2c1.2 0 2.3.6 3 1.6l2.6 4.8c.7 1 1.8 1.6 3 1.6h2.2M12.5 10l2 2-2 2M1.5 12h2.2c1.2 0 2.3-.6 3-1.6M9.3 5.6c.7-1 1.8-1.6 3-1.6h2.2M12.5 2l2 2-2 2"/></svg>',
+		repeat: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8V6.5A2.5 2.5 0 0 1 4.5 4h9M11.5 2l2 2-2 2M14 8v1.5A2.5 2.5 0 0 1 11.5 12h-9M4.5 10l-2 2 2 2"/></svg>',
+		repeatOne: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8V6.5A2.5 2.5 0 0 1 4.5 4h9M11.5 2l2 2-2 2M14 8v1.5A2.5 2.5 0 0 1 11.5 12h-9M4.5 10l-2 2 2 2"/><path d="M7.4 6.6 8.3 6v4" stroke-width="1.3"/></svg>',
+		heart: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8 13.8 2.6 8.6A3.3 3.3 0 0 1 7.3 3.9L8 4.6l.7-.7a3.3 3.3 0 0 1 4.7 4.7L8 13.8z"/></svg>',
+		heartFilled: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 13.8 2.6 8.6A3.3 3.3 0 0 1 7.3 3.9L8 4.6l.7-.7a3.3 3.3 0 0 1 4.7 4.7L8 13.8z"/></svg>',
+		volume: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h2.5L8 3v10L4.5 10H2zM10.5 5.5a3.5 3.5 0 0 1 0 5M12.5 3.5a6.3 6.3 0 0 1 0 9"/></svg>',
+		muted: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h2.5L8 3v10L4.5 10H2zM10.5 6l4 4M14.5 6l-4 4"/></svg>',
 	};
 
 	const CSS = `
@@ -100,7 +107,22 @@
 		.lpm-track { position: relative; height: 4px; border-radius: 2px; background: rgba(255,255,255,.25); cursor: pointer; }
 		.lpm-track::before { content: ""; position: absolute; inset: -6px 0; }
 		.lpm-fill { height: 100%; width: 0; border-radius: 2px; background: #fff; }
-		.lpm-controls { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 8px 0 12px; flex: 0 0 auto; }
+		.lpm-controls { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 8px 0 6px; flex: 0 0 auto; }
+		.lpm-ctl.lpm-small { width: 28px; height: 28px; color: rgba(255,255,255,.7); }
+		.lpm-ctl.lpm-small svg { width: 15px; height: 15px; }
+		.lpm-ctl.lpm-small:hover { color: #fff; }
+		.lpm-ctl.lpm-on { color: var(--spice-button, #1ed760); }
+		.lpm-extras { display: flex; align-items: center; gap: 6px; padding: 0 16px 10px; flex: 0 0 auto; }
+		.lpm-spacer { flex: 1; }
+		.lpm-volume { width: 96px; height: 4px; margin: 0; border-radius: 2px; appearance: none; -webkit-appearance: none; cursor: pointer;
+			background: linear-gradient(to right, #fff var(--lpm-vol, 0%), rgba(255,255,255,.25) var(--lpm-vol, 0%)); }
+		.lpm-volume::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .15s; }
+		.lpm-volume:hover::-webkit-slider-thumb, .lpm-volume:active::-webkit-slider-thumb { opacity: 1; }
+		.lpm[data-mode="compact"] .lpm-extras { display: none; }
+		/* "Show only on hover": progress, controls and volume fade in when the pointer is over the player */
+		.lpm.lpm-hover-controls .lpm-progress, .lpm.lpm-hover-controls .lpm-controls, .lpm.lpm-hover-controls .lpm-extras { opacity: 0; transition: opacity .2s; }
+		.lpm.lpm-hover-controls:hover .lpm-progress, .lpm.lpm-hover-controls:hover .lpm-controls, .lpm.lpm-hover-controls:hover .lpm-extras,
+		.lpm.lpm-hover-controls:focus-within .lpm-progress, .lpm.lpm-hover-controls:focus-within .lpm-controls, .lpm.lpm-hover-controls:focus-within .lpm-extras { opacity: 1; }
 		.lpm-ctl { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #fff; cursor: pointer; }
 		.lpm-ctl svg { width: 16px; height: 16px; }
 		.lpm-ctl.lpm-play { width: 40px; height: 40px; background: #fff; color: #000; }
@@ -143,7 +165,7 @@
 		.lpm.lpm-full .lpm-art { width: min(42vh, 32vw); height: min(42vh, 32vw); border-radius: 12px; }
 		.lpm.lpm-full .lpm-title { font-size: clamp(22px, 3.4vw, 54px); white-space: normal; }
 		.lpm.lpm-full .lpm-artist { font-size: clamp(14px, 1.6vw, 26px); }
-		.lpm.lpm-full .lpm-progress, .lpm.lpm-full .lpm-controls { width: min(42vh, 32vw); padding-left: 0; padding-right: 0; }
+		.lpm.lpm-full .lpm-progress, .lpm.lpm-full .lpm-controls, .lpm.lpm-full .lpm-extras { width: min(42vh, 32vw); padding-left: 0; padding-right: 0; }
 		.lpm.lpm-full .lpm-lyrics { display: block; height: 80vh; font-size: calc(var(--lpm-font, 18px) * 1.8); text-align: left; }
 		.lpm.lpm-full.lpm-nolyrics .lpm-lyrics { display: none; }
 		/* Full screen on a tall (portrait) screen: cover, song and controls on top, lyrics below */
@@ -154,7 +176,8 @@
 		.lpm.lpm-full[data-mode="portrait"] .lpm-title { font-size: clamp(22px, 5vw, 56px); }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-artist { font-size: clamp(14px, 2.6vw, 28px); }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-progress,
-		.lpm.lpm-full[data-mode="portrait"] .lpm-controls { width: min(56vw, 520px); }
+		.lpm.lpm-full[data-mode="portrait"] .lpm-controls,
+		.lpm.lpm-full[data-mode="portrait"] .lpm-extras { width: min(56vw, 520px); }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-lyrics { height: auto; min-height: 0; padding-bottom: 20vh; font-size: calc(var(--lpm-font, 18px) * 1.6); text-align: center; }
 		.lpm-side { display: contents; }
 	`;
@@ -329,15 +352,42 @@
 		els.track = h("div", { class: "lpm-track", role: "slider", "aria-label": "Seek" }, els.fill);
 		els.progress = h("div", { class: "lpm-progress" }, els.elapsed, els.track, els.remaining);
 		els.playBtn = iconButton("play", "Play", () => Spicetify.Player.togglePlay(), "lpm-ctl lpm-play");
+		els.shuffleBtn = iconButton("shuffle", "Shuffle", () => {
+			Spicetify.Player.toggleShuffle();
+			setTimeout(paintModes, 150);
+		}, "lpm-ctl lpm-small");
+		els.repeatBtn = iconButton("repeat", "Repeat", () => {
+			Spicetify.Player.toggleRepeat();
+			setTimeout(paintModes, 150);
+		}, "lpm-ctl lpm-small");
 		els.controls = h(
 			"div",
 			{ class: "lpm-controls" },
+			els.shuffleBtn,
 			iconButton("prev", "Previous", () => Spicetify.Player.back(), "lpm-ctl"),
 			els.playBtn,
-			iconButton("next", "Next", () => Spicetify.Player.next(), "lpm-ctl")
+			iconButton("next", "Next", () => Spicetify.Player.next(), "lpm-ctl"),
+			els.repeatBtn
 		);
+		// Like button and volume, on their own row under the playback controls
+		els.likeBtn = iconButton("heart", "Save to Liked Songs", () => {
+			Spicetify.Player.toggleHeart();
+			setTimeout(paintModes, 300);
+		}, "lpm-ctl lpm-small");
+		els.muteBtn = iconButton("volume", "Mute", () => {
+			Spicetify.Player.toggleMute();
+			setTimeout(paintModes, 150);
+		}, "lpm-ctl lpm-small");
+		els.volume = h("input", { type: "range", class: "lpm-volume", min: "0", max: "100", step: "1", "aria-label": "Volume" });
+		els.volume.addEventListener("input", () => {
+			Spicetify.Player.setVolume(Number(els.volume.value) / 100);
+			paintVolume();
+		});
+		els.volume.addEventListener("pointerdown", () => (mini.draggingVolume = true));
+		els.volume.addEventListener("pointerup", () => (mini.draggingVolume = false));
+		els.extras = h("div", { class: "lpm-extras" }, els.likeBtn, h("span", { class: "lpm-spacer" }), els.muteBtn, els.volume);
 		// In full screen the cover, title, progress and controls stack on the left, lyrics on the right
-		els.side = h("div", { class: "lpm-side" }, els.art, els.meta, els.progress, els.controls);
+		els.side = h("div", { class: "lpm-side" }, els.art, els.meta, els.progress, els.controls, els.extras);
 		els.main = h("div", { class: "lpm-main" }, els.side, els.lyrics);
 
 		const root = h("div", { class: "lpm", role: "dialog", "aria-label": "Mini player" }, els.bg, els.bar, els.main);
@@ -405,10 +455,11 @@
 		root.dataset.mode = mode;
 		// Outside full screen the progress bar and controls sit full width under everything else
 		if (full) {
-			if (els.progress.parentElement !== els.side) els.side.append(els.progress, els.controls);
+			if (els.progress.parentElement !== els.side) els.side.append(els.progress, els.controls, els.extras);
 		} else if (els.progress.parentElement !== root) {
-			root.append(els.progress, els.controls);
+			root.append(els.progress, els.controls, els.extras);
 		}
+		root.classList.toggle("lpm-hover-controls", store.get("hoverControls", false));
 	}
 
 	function clampIntoView() {
@@ -542,6 +593,20 @@
 			h("h4", {}, "Lyrics"),
 			SCRIPTS.map(([id, label]) => h("button", { type: "button", class: id === script ? "lpm-on" : "", onclick: () => pickScript(id) }, label)),
 			h("div", { class: "lpm-row" }, h("button", { type: "button", title: "Smaller lyrics", onclick: () => font(-1) }, "A−"), h("button", { type: "button", title: "Larger lyrics", onclick: () => font(1) }, "A+")),
+			h("h4", {}, "Controls"),
+			h(
+				"button",
+				{
+					type: "button",
+					class: store.get("hoverControls", false) ? "lpm-on" : "",
+					onclick: () => {
+						store.set("hoverControls", !store.get("hoverControls", false));
+						toggleMenu();
+						layoutForMode();
+					},
+				},
+				"Show only on hover"
+			),
 			h("h4", {}, "Background"),
 			BACKGROUNDS.map((b) => h("button", { type: "button", class: b.id === current ? "lpm-on" : "", onclick: () => pick(b.id) }, b.label)),
 			h("h4", {}, "Kept-on-top window"),
@@ -736,6 +801,47 @@
 		mini.els.playBtn.title = playing ? "Pause" : "Play";
 	}
 
+	// Shuffle, repeat and like can change from anywhere in Spotify, so they're re-read on every tick
+	function paintModes() {
+		if (!mini) return;
+		const { els } = mini;
+		const shuffle = !!Spicetify.Player.getShuffle?.();
+		els.shuffleBtn.classList.toggle("lpm-on", shuffle);
+		els.shuffleBtn.title = shuffle ? "Shuffle: on" : "Shuffle: off";
+		const repeat = Spicetify.Player.getRepeat?.() ?? 0; // 0 off, 1 all, 2 one song
+		els.repeatBtn.classList.toggle("lpm-on", repeat > 0);
+		const repeatIcon = repeat === 2 ? ICONS.repeatOne : ICONS.repeat;
+		if (els.repeatBtn.dataset.icon !== repeatIcon) {
+			els.repeatBtn.innerHTML = repeatIcon;
+			els.repeatBtn.dataset.icon = repeatIcon;
+		}
+		els.repeatBtn.title = ["Repeat: off", "Repeat: all", "Repeat: this song"][repeat] ?? "Repeat";
+		const liked = !!Spicetify.Player.getHeart?.();
+		els.likeBtn.classList.toggle("lpm-on", liked);
+		const likeIcon = liked ? ICONS.heartFilled : ICONS.heart;
+		if (els.likeBtn.dataset.icon !== likeIcon) {
+			els.likeBtn.innerHTML = likeIcon;
+			els.likeBtn.dataset.icon = likeIcon;
+		}
+		els.likeBtn.title = liked ? "Remove from Liked Songs" : "Save to Liked Songs";
+		paintVolume();
+	}
+
+	function paintVolume() {
+		if (!mini) return;
+		const { els } = mini;
+		const muted = !!Spicetify.Player.getMute?.();
+		const volume = Math.round((Spicetify.Player.getVolume?.() ?? 0) * 100);
+		if (!mini.draggingVolume) els.volume.value = String(muted ? 0 : volume);
+		els.volume.style.setProperty("--lpm-vol", `${muted ? 0 : volume}%`);
+		const icon = muted || volume === 0 ? ICONS.muted : ICONS.volume;
+		if (els.muteBtn.dataset.icon !== icon) {
+			els.muteBtn.innerHTML = icon;
+			els.muteBtn.dataset.icon = icon;
+		}
+		els.muteBtn.title = muted ? "Unmute" : "Mute";
+	}
+
 	function tick() {
 		if (!mini) return;
 		const { els } = mini;
@@ -744,6 +850,7 @@
 		els.elapsed.textContent = fmt(progress);
 		els.remaining.textContent = `-${fmt(duration - progress)}`;
 		els.fill.style.width = `${duration ? Math.min(100, (progress / duration) * 100) : 0}%`;
+		paintModes();
 
 		if (!mini.lines.length || mini.lines[0].startTime === null) return;
 		let index = -1;
