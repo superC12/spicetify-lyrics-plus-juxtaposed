@@ -420,10 +420,14 @@
 			setTimeout(paintModes, 300);
 		}, "lpm-like");
 		els.muteBtn = iconButton("volume", "Mute", () => {
+			// setMute/toggleMute click Spotify's old volume-button selector, which newer clients no longer expose.
 			const volume = Spicetify.Player.getVolume();
-			const unmute = Spicetify.Player.getMute() || volume === 0;
-			if (unmute && volume === 0) Spicetify.Player.setVolume(mini.lastAudibleVolume ?? 0.5);
-			Spicetify.Player.setMute(!unmute);
+			if (volume > 0) {
+				mini.lastAudibleVolume = volume;
+				Spicetify.Player.setVolume(0);
+			} else {
+				Spicetify.Player.setVolume(mini.lastAudibleVolume ?? 0.5);
+			}
 			setTimeout(paintModes, 150);
 		}, "lpm-ctl lpm-small lpm-mute");
 		els.volume = h("input", { type: "range", class: "lpm-volume", min: "0", max: "100", step: "1", "aria-label": "Volume" });

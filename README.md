@@ -104,6 +104,8 @@ Related changes are combined under the newest release version.
 
 ### v1.3.0
 
+- Fixed mute/unmute on newer Spotify versions by setting volume directly, without relying on Spotify’s renamed volume button. The previous audible level is restored on unmute.
+
 - Added a Windows updater for manual installs, with optional daily updates and rollback on failure.
 
 - Volume icon has a larger click target, keyboard focus feedback, and synchronized Mute/Unmute labels. Clicking at zero volume restores the last audible level.
