@@ -77,48 +77,30 @@ The lyrics pop-up and song-info panel follow ideas from Juxtopposed's video [I R
 
 ## 📋 Changelog
 
-### v1.3.2
+Consolidated release notes: patch updates are grouped under their minor release, with basic controls included in the initial feature release. Historical Git commits, tags and source version identifiers are preserved.
 
-- The song bar has a ball you can drag to seek. The time follows while you drag.
-- Shorter volume bar in portrait full screen.
+### v1.3.0 (includes v1.3.2)
 
-### v1.3.1
+- Volume icon has a larger click target, keyboard focus feedback, and synchronized Mute/Unmute labels. Clicking at zero volume restores the last audible level.
 
-- With **Show only on hover** on, the hidden controls now give their space to the lyrics instead of leaving a gap. Full screen on a wide screen keeps its layout.
-- New like button: a two-tone badge next to the song title that turns pink when liked and pops when tapped.
-- Full screen on a portrait screen: the volume is a vertical bar on the left edge with its icon below.
-- Bigger, brighter controls in full screen.
-
-### v1.3.0
-
-- Added shuffle, repeat (all / this song), like and a volume slider with mute to the mini player and full screen.
-- New ··· menu option: show the controls only on hover.
-
-### v1.2.2
-
-- Fixed full screen on portrait (tall) screens: the cover, song and controls now sit on top with the lyrics below, instead of the lyrics running over them.
-
-### v1.2.1
-
-- The lyrics button opens the lyrics page again, like Spotify's own. The mini player is now on right-click and on a button on the lyrics page.
+- Mini-player and full-screen shuffle, repeat, like and volume controls.
+- Draggable seek ball with time feedback; shorter vertical volume slider in portrait full screen.
+- Optional controls on hover give their space to lyrics when hidden.
+- Two-tone like badge beside the title and larger full-screen controls.
 
 ### v1.2.0
 
-- The player bar button now does one thing everywhere: open or close the mini player. The duplicate Lyrics icon in the top bar is hidden while it's on.
-- The kept-on-top window can be dragged by its top bar or snapped to a corner.
-- Full screen now covers the whole screen, including the player bar, matches the chosen background, and is also what Spotify's own full screen button opens.
-- New lyrics option: as written, romanized, or both.
+- Full screen covers the player bar, follows the selected background and supports portrait layouts. Spotify's full-screen button opens it too.
+- Always-on-top window dragging and corner snapping.
+- Original, romanized or combined lyrics.
 
 ### v1.1.0
 
-- The lyrics pop-up is now a mini player: draggable, resizable, with playback controls, Compact / Expanded / Lyrics layouts, keep-on-top, full screen and a choice of background.
-- Fixed the mode tabs (Karaoke, Synced, Unsynced) flipping between tabs and a dropdown whenever the page re-rendered, for example when changing the text size.
-
-### v1.0.1
-
-- Fixed the lyrics page crashing with "Something went wrong" on Spotify 1.3.4 and later. Lyrics Plus looked for parts of the page that Spotify removed in that version.
-- If the page does crash, it now shows the error with a **Copy details** button instead of a blank page.
+- Draggable, resizable mini player with Compact, Expanded and Lyrics layouts, keep-on-top and background choices.
 
 ### v1.0.0
 
-- Initial release.
+- Initial release: song-info panel, lyrics size buttons and calmer colours.
+- Player-bar lyrics button opens or closes the lyrics page; right-click opens the mini player. Duplicate top-bar icon is hidden.
+- Stable mode tabs when resizing text or re-rendering.
+- Spotify 1.3.4 compatibility and readable errors with **Copy details**.

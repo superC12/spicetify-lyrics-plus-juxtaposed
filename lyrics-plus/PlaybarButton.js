@@ -147,6 +147,9 @@
 		.lpm.lpm-hover-controls .lpm-like { opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s, transform .15s; }
 		.lpm.lpm-hover-controls:hover .lpm-like, .lpm.lpm-hover-controls:focus-within .lpm-like { opacity: 1; visibility: visible; }
 		.lpm-ctl { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #fff; cursor: pointer; }
+		.lpm-ctl.lpm-mute { flex-shrink: 0; min-width: 36px; min-height: 36px; position: relative; z-index: 2; }
+		.lpm-mute:hover { background: rgba(255,255,255,.12); }
+		.lpm-mute:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 		.lpm-ctl svg { width: 16px; height: 16px; }
 		.lpm-ctl.lpm-play { width: 40px; height: 40px; background: #fff; color: #000; }
 		.lpm-ctl:hover { transform: scale(1.06); }
@@ -417,9 +420,12 @@
 			setTimeout(paintModes, 300);
 		}, "lpm-like");
 		els.muteBtn = iconButton("volume", "Mute", () => {
-			Spicetify.Player.toggleMute();
+			const volume = Spicetify.Player.getVolume();
+			const unmute = Spicetify.Player.getMute() || volume === 0;
+			if (unmute && volume === 0) Spicetify.Player.setVolume(mini.lastAudibleVolume ?? 0.5);
+			Spicetify.Player.setMute(!unmute);
 			setTimeout(paintModes, 150);
-		}, "lpm-ctl lpm-small");
+		}, "lpm-ctl lpm-small lpm-mute");
 		els.volume = h("input", { type: "range", class: "lpm-volume", min: "0", max: "100", step: "1", "aria-label": "Volume" });
 		els.volume.addEventListener("input", () => {
 			Spicetify.Player.setVolume(Number(els.volume.value) / 100);
@@ -910,7 +916,11 @@
 			els.muteBtn.innerHTML = icon;
 			els.muteBtn.dataset.icon = icon;
 		}
-		els.muteBtn.title = muted ? "Unmute" : "Mute";
+		if (!muted && volume > 0) mini.lastAudibleVolume = volume / 100;
+		const silent = muted || volume === 0;
+		els.muteBtn.title = silent ? "Unmute" : "Mute";
+		els.muteBtn.setAttribute("aria-label", els.muteBtn.title);
+		els.muteBtn.setAttribute("aria-pressed", String(silent));
 	}
 
 	// Song bar and times. While the ball is being dragged they show the drag position; returns the real position.
