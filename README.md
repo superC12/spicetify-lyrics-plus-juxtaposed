@@ -77,6 +77,11 @@ The lyrics pop-up and song-info panel follow ideas from Juxtopposed's video [I R
 
 ## 📋 Changelog
 
+### v1.3.2
+
+- The song bar has a ball you can drag to seek. The time follows while you drag.
+- Shorter volume bar in portrait full screen.
+
 ### v1.3.1
 
 - With **Show only on hover** on, the hidden controls now give their space to the lyrics instead of leaving a gap. Full screen on a wide screen keeps its layout.

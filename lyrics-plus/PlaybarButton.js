@@ -111,7 +111,14 @@
 		.lpm-progress span:last-child { text-align: right; }
 		.lpm-track { position: relative; height: 4px; border-radius: 2px; background: rgba(255,255,255,.25); cursor: pointer; }
 		.lpm-track::before { content: ""; position: absolute; inset: -6px 0; }
-		.lpm-fill { height: 100%; width: 0; border-radius: 2px; background: #fff; }
+		.lpm-fill { position: relative; height: 100%; width: 0; border-radius: 2px; background: #fff; }
+		.lpm-track { touch-action: none; transition: height .15s; }
+		.lpm-track:hover, .lpm-track.lpm-seeking { height: 6px; border-radius: 3px; }
+		/* The ball at the end of the song bar: drag it to seek */
+		.lpm-knob { position: absolute; top: 50%; right: -6px; width: 12px; height: 12px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.45);
+			transform: translateY(-50%); transition: width .15s, height .15s, right .15s; }
+		.lpm-track:hover .lpm-knob, .lpm-track.lpm-seeking .lpm-knob { right: -8px; width: 16px; height: 16px; }
+		.lpm-track.lpm-seeking { cursor: grabbing; }
 		.lpm-controls { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 8px 0 6px; flex: 0 0 auto; }
 		.lpm-ctl.lpm-small { width: 28px; height: 28px; color: rgba(255,255,255,.7); }
 		.lpm-ctl.lpm-small svg { width: 15px; height: 15px; }
@@ -209,7 +216,7 @@
 		/* Portrait: volume as a vertical bar on the left edge with its icon below. It fades with the rest of the controls. */
 		.lpm.lpm-full[data-mode="portrait"] .lpm-extras { padding: 0; }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-volwrap { position: absolute; left: 3.5vw; top: 50%; transform: translateY(-50%); flex-direction: column; gap: 12px; z-index: 1; }
-		.lpm.lpm-full[data-mode="portrait"] .lpm-volume { writing-mode: vertical-lr; direction: rtl; width: 6px; height: 30vh; border-radius: 3px;
+		.lpm.lpm-full[data-mode="portrait"] .lpm-volume { writing-mode: vertical-lr; direction: rtl; width: 6px; height: clamp(120px, 18vh, 240px); border-radius: 3px;
 			background: linear-gradient(to top, #fff var(--lpm-vol, 0%), rgba(255,255,255,.25) var(--lpm-vol, 0%)); }
 		.lpm.lpm-full[data-mode="portrait"] .lpm-lyrics { height: auto; min-height: 0; padding-bottom: 20vh; font-size: calc(var(--lpm-font, 18px) * 1.6); text-align: center; }
 		.lpm-side { display: contents; }
@@ -380,7 +387,7 @@
 		els.lyrics = h("div", { class: "lpm-lyrics" });
 		els.elapsed = h("span", {}, "0:00");
 		els.remaining = h("span", {}, "-0:00");
-		els.fill = h("div", { class: "lpm-fill" });
+		els.fill = h("div", { class: "lpm-fill" }, h("div", { class: "lpm-knob" }));
 		els.track = h("div", { class: "lpm-track", role: "slider", "aria-label": "Seek" }, els.fill);
 		els.progress = h("div", { class: "lpm-progress" }, els.elapsed, els.track, els.remaining);
 		els.playBtn = iconButton("play", "Play", () => Spicetify.Player.togglePlay(), "lpm-ctl lpm-play");
@@ -446,11 +453,35 @@
 		clampIntoView();
 
 		makeDraggable();
-		els.track.addEventListener("click", (e) => {
+		// Click or drag the song bar. While dragging, the bar and time follow the pointer; the seek happens on release.
+		const seekRatio = (e) => {
 			const rect = els.track.getBoundingClientRect();
-			const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-			Spicetify.Player.seek(Math.round(ratio * (Spicetify.Player.getDuration() || 0)));
+			return Math.min(1, Math.max(0, (e.clientX - rect.left) / Math.max(rect.width, 1)));
+		};
+		els.track.addEventListener("pointerdown", (e) => {
+			if (e.button !== 0) return;
+			e.preventDefault();
+			try {
+				els.track.setPointerCapture(e.pointerId);
+			} catch {}
+			mini.seeking = seekRatio(e);
+			els.track.classList.add("lpm-seeking");
+			paintProgress();
 		});
+		els.track.addEventListener("pointermove", (e) => {
+			if (mini?.seeking == null) return;
+			mini.seeking = seekRatio(e);
+			paintProgress();
+		});
+		const endSeek = (e, commit) => {
+			if (mini?.seeking == null) return;
+			const ratio = commit ? seekRatio(e) : null;
+			mini.seeking = null;
+			els.track.classList.remove("lpm-seeking");
+			if (ratio !== null) Spicetify.Player.seek(Math.round(ratio * (Spicetify.Player.getDuration() || 0)));
+		};
+		els.track.addEventListener("pointerup", (e) => endSeek(e, true));
+		els.track.addEventListener("pointercancel", (e) => endSeek(e, false));
 
 		mini.resizeObserver = new ResizeObserver(() => {
 			layoutForMode();
@@ -882,14 +913,22 @@
 		els.muteBtn.title = muted ? "Unmute" : "Mute";
 	}
 
-	function tick() {
-		if (!mini) return;
+	// Song bar and times. While the ball is being dragged they show the drag position; returns the real position.
+	function paintProgress() {
 		const { els } = mini;
 		const progress = Spicetify.Player.getProgress() || 0;
 		const duration = Spicetify.Player.getDuration() || 0;
-		els.elapsed.textContent = fmt(progress);
-		els.remaining.textContent = `-${fmt(duration - progress)}`;
-		els.fill.style.width = `${duration ? Math.min(100, (progress / duration) * 100) : 0}%`;
+		const shown = mini.seeking != null ? mini.seeking * duration : progress;
+		els.elapsed.textContent = fmt(shown);
+		els.remaining.textContent = `-${fmt(duration - shown)}`;
+		els.fill.style.width = `${duration ? Math.min(100, (shown / duration) * 100) : 0}%`;
+		return progress;
+	}
+
+	function tick() {
+		if (!mini) return;
+		const { els } = mini;
+		const progress = paintProgress();
 		paintModes();
 
 		if (!mini.lines.length || mini.lines[0].startTime === null) return;
