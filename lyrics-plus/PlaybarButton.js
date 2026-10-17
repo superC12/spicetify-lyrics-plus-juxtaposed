@@ -148,7 +148,7 @@
 		.lpm.lpm-hover-controls .lpm-like { opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s, transform .15s; }
 		.lpm.lpm-hover-controls:hover .lpm-like, .lpm.lpm-hover-controls:focus-within .lpm-like { opacity: 1; visibility: visible; }
 		.lpm-ctl { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #fff; cursor: pointer; }
-		.lpm-ctl.lpm-mute { flex-shrink: 0; min-width: 36px; min-height: 36px; position: relative; z-index: 2; }
+		.lpm-ctl.lpm-mute { flex-shrink: 0; min-width: 36px; min-height: 36px; z-index: 2; }
 		.lpm-mute:hover { background: rgba(255,255,255,.12); }
 		.lpm-mute:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 		.lpm-ctl svg { width: 16px; height: 16px; }
