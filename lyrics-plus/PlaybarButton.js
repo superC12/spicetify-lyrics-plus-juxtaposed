@@ -964,6 +964,18 @@
 		Spicetify.Player.toggleShuffle();
 	}
 
+	// Shared with other extensions (the DeskThing bridge) so lyrics, romanization and smart shuffle behave the same everywhere
+	window.LyricsPlusShared = {
+		fetchFromSpotify,
+		fetchFromLrclib,
+		romanizeLines,
+		cycleShuffle,
+		shuffleMode: () => {
+			refreshShuffleState();
+			return shuffleMode();
+		},
+	};
+
 	// Shuffle, repeat and like can change from anywhere in Spotify, so they're re-read on every tick
 	function paintModes() {
 		if (!mini) return;
