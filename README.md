@@ -13,7 +13,7 @@ A modified copy of the [Lyrics Plus](https://github.com/spicetify/cli/tree/main/
 - **Song-info panel.** The lyrics page shows a large cover with the title, artist and album beside the lyrics. Windows narrower than 1100px keep the original full-width layout.
 - **A− / A+ buttons.** Change the lyrics size in one click. Ctrl + mouse wheel still works.
 - **One lyrics button.** The player bar's lyrics button opens the lyrics page and takes you back when clicked again, like Spotify's own. It replaces the separate Lyrics icon in the top bar.
-- **Mini player.** Right-click the lyrics button, or use the mini player button on the lyrics page, for a mini player with the cover, song, progress bar, shuffle, previous, play, next, repeat, a like button, a volume slider and synced lyrics. Click a line to jump to it.
+- **Mini player.** Right-click the lyrics button, or use the mini player button on the lyrics page, for a mini player with the cover, song, progress bar, shuffle (including smart shuffle), previous, play, next, repeat, a like button, a volume slider and synced lyrics. Click a line to jump to it.
   - **Drag it anywhere** by its top bar, and **resize it** from the bottom-right corner. It remembers where you left it.
   - **Three layouts that follow its size**, like a desktop mini player: **Compact** (short and wide: small cover and controls), **Expanded** (square: big cover) and **Lyrics** (tall: lyrics fill the space).
   - **Keep on top**: pops the mini player out into its own always-on-top window, using the same feature as Spotify's own mini player. Drag it by its top bar, snap it to a corner from the ··· menu, and resize it to switch layouts.
@@ -88,7 +88,7 @@ spicetify apply
 ```
 
 > [!NOTE]
-> Based on the Lyrics Plus shipped with Spicetify 2.45.3, tested on Spotify 1.3.4 on Windows and checked against 1.3.5. It does not pick up later fixes to the original automatically. On Spotify 1.3.4 and 1.3.5 the player bar button only appears when something restores the element names that version removed, which the [Juxtaposed](https://github.com/superC12/spicetify-juxtaposed) theme does.
+> Based on the Lyrics Plus shipped with Spicetify 2.45.3, tested on Spotify 1.3.4 on Windows and checked against 1.3.5 and 1.3.6 with Spicetify 2.46.2. It does not pick up later fixes to the original automatically. On Spotify 1.3.4 and 1.3.5 the player bar button only appears when something restores the element names that version removed, which the [Juxtaposed](https://github.com/superC12/spicetify-juxtaposed) theme does.
 
 ## 💡 Credits and license
 
@@ -101,6 +101,13 @@ The lyrics pop-up and song-info panel follow ideas from Juxtopposed's video [I R
 ## 📋 Changelog
 
 Related changes are combined under the newest release version.
+
+### v1.4.0
+
+- Shuffle cycles through off, shuffle and smart shuffle like Spotify's own button, wherever Spotify offers smart shuffle. Its tooltip says why when it doesn't.
+- Shuffle and repeat sit in a tinted circle with a dot under them when on, and every control presses in when clicked.
+- Lyrics, romanization and shuffle helpers are shared with other extensions, such as the DeskThing bridge.
+- Checked against Spotify 1.3.6 with Spicetify 2.46.2.
 
 ### v1.3.0
 
