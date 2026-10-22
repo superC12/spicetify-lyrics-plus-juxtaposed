@@ -1,6 +1,6 @@
 {
 	"name": "Lyrics Plus (Juxtaposed Edition)",
-	"description": "Spicetify's Lyrics Plus with a song-info panel, one-click text size buttons and a small lyrics pop-up on the player bar.",
+	"description": "Spicetify's Lyrics Plus with a song-info panel, one-click text size buttons and a mini player with synced lyrics, keep-on-top and full screen.",
 	"preview": "preview.png",
 	"readme": "README.md",
 	"tags": ["lyrics", "fork"]
